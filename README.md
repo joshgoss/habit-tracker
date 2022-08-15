@@ -1,1 +1,1 @@
-# habit-tracker
+# habits-tracker
