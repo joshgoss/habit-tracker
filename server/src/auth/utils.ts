@@ -1,9 +1,15 @@
 import jwt from "jsonwebtoken";
-import config from "../config.js";
+import config from "../config";
 
 export interface JwtPayload {
-  sub: string;
-  provider: string;
+	sub: string;
+	provider: string;
+}
+
+export enum AuthProvider {
+	Apple = "Apple",
+	Github = "Github",
+	Google = "Google",
 }
 
 /**
@@ -12,5 +18,5 @@ export interface JwtPayload {
  * @returns {string}
  */
 export const generateAccessToken = (payload: JwtPayload): string => {
-  return jwt.sign(payload, config.JWT_SECRET, { expiresIn: "6h" });
+	return jwt.sign(payload, config.JWT_SECRET, { expiresIn: "6h" });
 };
