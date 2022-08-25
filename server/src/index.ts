@@ -21,18 +21,6 @@ serverDebug("Registering passport strategies");
 passport.use(googleStrategy);
 passport.use(jwtStrategy);
 
-process.on("SIGINT", async () => {
-	serverDebug("Closing app");
-	await disconnectDatabase();
-	process.exit(0);
-});
-
-process.on("SIGTERM", async () => {
-	serverDebug("Closing app");
-	await disconnectDatabase();
-	process.exit(0);
-});
-
 const app: Express = express();
 
 app.get("/healthcheck", (req: Request, res: Response) => {
@@ -41,10 +29,29 @@ app.get("/healthcheck", (req: Request, res: Response) => {
 
 app.use("/auth", authRoutes);
 
-app.listen(config.PORT, () => {
-	console.log(
-		`[server]: Server is running at https://localhost:${config.PORT}`
-	);
-});
+if (require.main === module) {
+	app.listen(config.PORT, () => {
+		console.log(
+			`[server]: Server is running at https://localhost:${config.PORT}`
+		);
+	});
+
+	app.on("finish", () => {
+		serverDebug("app finishing..");
+	});
+
+	app.on("close", () => {
+		serverDebug("app closing...");
+	});
+}
+
+const cleanUp = async () => {
+	serverDebug("Shutting down app...");
+	await disconnectDatabase();
+	process.exit(0);
+};
+
+process.on("SIGINT", cleanUp);
+process.on("SIGTERM", cleanUp);
 
 export default app;
