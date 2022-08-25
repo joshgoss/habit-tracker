@@ -52,7 +52,7 @@ router.get(
 		googleDebug(`accessToken is: ${accessToken}`);
 		googleDebug(`Redirecting to:  ${config.AUTH_SUCCESS_REDIRECT}`);
 		res.redirect(
-			301,
+			302,
 			`${config.AUTH_SUCCESS_REDIRECT}?accessToken=${accessToken}`
 		);
 	}

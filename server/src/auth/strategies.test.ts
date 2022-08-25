@@ -4,6 +4,7 @@ import config from "../config";
 import { connectDatabase, disconnectDatabase } from "../database";
 import { verifyGoogle } from "./strategies";
 import { User } from "../users/models";
+import { createUser } from "../testUtils";
 
 describe("Test Strategies", () => {
 	beforeAll(async () => {
@@ -39,12 +40,7 @@ describe("Test Strategies", () => {
 		});
 
 		it("should not create duplicate records if the user has already logged in", async () => {
-			const user = await User.create({
-				firstName: "Test",
-				lastName: "User",
-				provider: "Google",
-				providerUserId: Math.random().toString(),
-			});
+			const user = await createUser();
 			const req: Request = {} as Request;
 			const done = () => {};
 			const profile: Profile = {
