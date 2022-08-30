@@ -8,9 +8,9 @@ describe("GET /auth/me", () => {
 	let accessToken: string | undefined;
 
 	beforeAll(async () => {
-		const r = await createAndLoginUser();
-		user = r[0] as IUser;
-		accessToken = r[1] as string;
+		const creds = await createAndLoginUser();
+		user = creds.user;
+		accessToken = creds.accessToken;
 	});
 
 	afterAll(async () => {

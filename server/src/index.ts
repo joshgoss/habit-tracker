@@ -8,6 +8,7 @@ import Debug from "debug";
 import config from "./config";
 import { connectDatabase, disconnectDatabase } from "./database";
 import authRoutes from "./auth/routes";
+import habitsRoutes from "./habits/routes";
 import { jwtStrategy, googleStrategy } from "./auth/strategies";
 
 const serverDebug = Debug("server");
@@ -33,6 +34,7 @@ app.get("/healthcheck", (req: Request, res: Response) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/habits", habitsRoutes);
 
 if (require.main === module) {
 	app.listen(config.PORT, () => {
