@@ -1,4 +1,5 @@
 import express, { Express, Request, Response } from "express";
+import cors from "cors";
 import mongoose from "mongoose";
 import passport from "passport";
 import Debug from "debug";
@@ -22,6 +23,10 @@ passport.use(googleStrategy);
 passport.use(jwtStrategy);
 
 const app: Express = express();
+
+app.use(
+	cors({ origin: "*", allowedHeaders: ["Authorization", "Content-Type"] })
+);
 
 app.get("/healthcheck", (req: Request, res: Response) => {
 	res.json({ success: true });
