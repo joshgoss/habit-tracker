@@ -110,7 +110,7 @@ describe("/habits", () => {
 				.set("Authorization", `Bearer ${accessToken}`);
 			expect(resp.status).toBe(404);
 		});
-		it("should return user's habit successfully if it exists", async () => {
+		it("should return user's habit successfully", async () => {
 			const resp = await request(app)
 				.get(`/habits/${(habit as IHabit)._id.toString()}`)
 				.set("Authorization", `Bearer ${accessToken}`);
@@ -118,6 +118,73 @@ describe("/habits", () => {
 			expect(resp.status).toBe(200);
 			expect(resp.body).toHaveProperty("data");
 			expect(resp.body.data._id).toBe((habit as IHabit)._id.toString());
+		});
+	});
+
+	describe("DELETE /habits/:habitId", () => {
+		it("should deny access if invalid auth token is passed", async () => {
+			const resp = await request(app)
+				.delete(`/habits/${(habit as IHabit)._id}`)
+				.set("Authorization", `Bearer junktoken`);
+			expect(resp.status).toBe(401);
+		});
+		it("should return 404 error if habit cannot be found", async () => {
+			const newId = new mongoose.Types.ObjectId();
+			const resp = await request(app)
+				.delete(`/habits/${newId.toString()}`)
+				.set("Authorization", `Bearer ${accessToken}`);
+			expect(resp.status).toBe(404);
+		});
+		it("should delete user's habit successfully", async () => {
+			const delHabit = await Habit.create({
+				name: "Stretch",
+				icon: "person",
+				color: "red",
+				frequency: "daily",
+				amount: 2,
+				userId: (user as IUser)._id,
+			});
+			const resp = await request(app)
+				.delete(`/habits/${(delHabit as IHabit)._id.toString()}`)
+				.set("Authorization", `Bearer ${accessToken}`);
+
+			expect(resp.status).toBe(200);
+			expect(resp.body).toHaveProperty("data");
+			expect(resp.body.data._id).toBe((delHabit as IHabit)._id.toString());
+			await Habit.deleteOne({ _id: delHabit._id });
+		});
+	});
+
+	describe("PUT /habits/:habitId", () => {
+		it("should deny access if invalid auth token is passed", async () => {
+			const resp = await request(app)
+				.delete(`/habits/${(habit as IHabit)._id}`)
+				.set("Authorization", `Bearer junktoken`);
+			expect(resp.status).toBe(401);
+		});
+		it("should return 404 error if habit cannot be found", async () => {
+			const newId = new mongoose.Types.ObjectId();
+			const resp = await request(app)
+				.delete(`/habits/${newId.toString()}`)
+				.set("Authorization", `Bearer ${accessToken}`);
+			expect(resp.status).toBe(404);
+		});
+		it("should update user's habit successfully", async () => {
+			const resp = await request(app)
+				.put(`/habits/${(habit as IHabit)._id.toString()}`)
+				.set("Authorization", `Bearer ${accessToken}`)
+				.send({
+					name: "Read book",
+					icon: (habit as IHabit).icon,
+					color: (habit as IHabit).color,
+					frequency: (habit as IHabit).frequency,
+					amount: (habit as IHabit).amount,
+				});
+
+			expect(resp.status).toBe(200);
+			expect(resp.body).toHaveProperty("data");
+			expect(resp.body.data._id).toBe((habit as IHabit)._id.toString());
+			expect(resp.body.data.name).toBe("Read book");
 		});
 	});
 });

@@ -48,4 +48,31 @@ router.get(
 	}
 );
 
+router.delete(
+	"/:habitId",
+	passport.authenticate("jwt", { session: false }),
+	validateHabit,
+	async (req, res) => {
+		await Habit.deleteOne({ _id: req.habit._id, userId: req.user._id });
+		return res.json({ code: 200, data: req.habit });
+	}
+);
+
+router.put(
+	"/:habitId",
+	passport.authenticate("jwt", { session: false }),
+	validateHabit,
+	async (req, res) => {
+		const habit = await Habit.findOneAndUpdate(
+			{
+				_id: req.habit._id,
+				userId: req.user._id,
+			},
+			req.body,
+			{ new: true }
+		);
+		return res.json({ code: 200, data: habit });
+	}
+);
+
 export default router;
