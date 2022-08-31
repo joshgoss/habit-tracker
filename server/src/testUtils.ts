@@ -2,6 +2,11 @@ import { IUser, User } from "./users/models";
 import { faker } from "@faker-js/faker";
 import { AuthProvider, generateAccessToken } from "./auth/utils";
 
+interface TestCredentials {
+	user: IUser;
+	accessToken: string;
+}
+
 export const createUser = async (
 	authProvider: AuthProvider = AuthProvider.Google
 ): Promise<IUser> => {
@@ -19,7 +24,7 @@ export const loginUser = (user: IUser): string => {
 
 export const createAndLoginUser = async (
 	authProvider: AuthProvider = AuthProvider.Google
-): Promise<(IUser | string)[]> => {
+): Promise<TestCredentials> => {
 	const user = await createUser(authProvider);
-	return [user, loginUser(user)];
+	return { user: user, accessToken: loginUser(user) };
 };

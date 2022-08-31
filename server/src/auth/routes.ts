@@ -1,9 +1,8 @@
 import Debug from "debug";
-import { Request, Router } from "express";
+import { Router } from "express";
 import passport from "passport";
-import * as R from "ramda";
 import config from "../config";
-import { JwtPayload, generateAccessToken } from "./utils";
+import { generateAccessToken } from "./utils";
 
 const router = Router();
 
@@ -20,7 +19,7 @@ router.get(
 				.json({ code: 401, error: "Invalid auth token provided" });
 		}
 
-		return res.json({ data: req.user });
+		return res.json({ code: 200, data: req.user });
 	}
 );
 
