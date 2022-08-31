@@ -24,7 +24,7 @@ export interface IHabit {
 	color: string;
 	amount: number;
 	frequency: Frequency;
-	dayOfWeek: DayOfWeek[];
+	daysOfWeek: DayOfWeek[];
 	dayOfMonth: number;
 	userId: string;
 	createdAt: number;
@@ -38,7 +38,7 @@ const habitSchema = new Schema<IHabit>(
 		color: { type: String, required: true },
 		amount: { type: Number, required: true },
 		frequency: { type: String, required: true },
-		dayOfWeek: [{ type: String }],
+		daysOfWeek: [{ type: String }],
 		dayOfMonth: { type: Number },
 		userId: Schema.Types.ObjectId,
 	},

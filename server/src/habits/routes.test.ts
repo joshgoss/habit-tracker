@@ -51,4 +51,44 @@ describe("/habits", () => {
 			await Habit.deleteOne({ _id: habit._id });
 		});
 	});
+
+	describe("POST /habits", () => {
+		it("should deny access if invalid auth token is passed", async () => {
+			const resp = await request(app)
+				.post("/habits")
+				.set("Authorization", `Bearer junktoken`);
+			expect(resp.status).toBe(401);
+		});
+		it("should return error is payload is invalid", async () => {
+			const resp = await request(app)
+				.post("/habits")
+				.send({
+					amount: 1,
+					color: "red",
+					icon: "sun",
+					daysOfWeek: [],
+				})
+				.set("Authorization", `Bearer ${accessToken}`);
+			expect(resp.status).toBe(422);
+			expect(resp.body).toHaveProperty("errors");
+		});
+		it("should create a habit successfully with valid user and payload", async () => {
+			const resp = await request(app)
+				.post("/habits")
+				.send({
+					name: "Exercise",
+					amount: 1,
+					color: "red",
+					icon: "sun",
+					frequency: "daily",
+					daysOfWeek: [],
+				})
+				.set("Authorization", `Bearer ${accessToken}`);
+			expect(resp.status).toBe(201);
+			expect(resp.body).toHaveProperty("data");
+			expect(resp.body.data).toHaveProperty("_id");
+
+			await Habit.deleteOne({ _id: resp.body.data._id });
+		});
+	});
 });

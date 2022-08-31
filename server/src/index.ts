@@ -6,7 +6,7 @@ import Debug from "debug";
 
 // load config first since it also loads dotenv
 import config from "./config";
-import { connectDatabase, disconnectDatabase } from "./database";
+import { connectDatabase, disconnectDatabase } from "./lib/database";
 import authRoutes from "./auth/routes";
 import habitsRoutes from "./habits/routes";
 import { jwtStrategy, googleStrategy } from "./auth/strategies";
@@ -28,6 +28,8 @@ const app: Express = express();
 app.use(
 	cors({ origin: "*", allowedHeaders: ["Authorization", "Content-Type"] })
 );
+
+app.use(express.json());
 
 app.get("/healthcheck", (req: Request, res: Response) => {
 	res.json({ success: true });
