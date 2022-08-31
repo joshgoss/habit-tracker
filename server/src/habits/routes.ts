@@ -4,6 +4,7 @@ import passport from "passport";
 
 import { Habit } from "./models";
 import { ajv } from "../lib/validation";
+import { validateHabit } from "./middleware";
 
 const router = Router();
 
@@ -33,8 +34,17 @@ router.post(
 			return res.status(422).json({ code: 422, errors: validate.errors });
 		}
 
-		const data = await Habit.create({ ...req.body, userId: req.user._id });
-		return res.status(201).json({ code: 201, data });
+		const habit = await Habit.create({ ...req.body, userId: req.user._id });
+		return res.status(201).json({ code: 201, data: habit });
+	}
+);
+
+router.get(
+	"/:habitId",
+	passport.authenticate("jwt", { session: false }),
+	validateHabit,
+	async (req, res) => {
+		return res.json({ code: 200, data: req.habit });
 	}
 );
 

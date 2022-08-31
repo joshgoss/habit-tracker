@@ -1,15 +1,19 @@
 {
   "parser": "@typescript-eslint/parser",
-  "extends": ["plugin:@typescript-eslint/recommended", "prettier/@typescript-eslint", "plugin:prettier/recommended"],
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended"
+  ],
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module"
   },
   "env": {
     "es6": true,
-    "node": true,
+    "node": true
   },
- " rules": {
+  " rules": {
     "indent": ["error", 2, { "SwitchCase": 1 }],
     "no-var": "error",
     "no-multiple-empty-lines": "error",
@@ -17,6 +21,6 @@
     "no-undef": "error",
     "prefer-const": "error",
     "semi": "error",
-    "space-in-parens": "error"    
-  },
-};
+    "space-in-parens": "error"
+  }
+}

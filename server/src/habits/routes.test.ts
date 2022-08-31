@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import request from "supertest";
 import { IUser, User } from "../users/models";
 import { Habit, IHabit } from "../habits/models";
@@ -7,16 +8,30 @@ import app from "../index";
 describe("/habits", () => {
 	let user: IUser | undefined;
 	let accessToken: string | undefined;
+	let habit: IHabit | undefined;
 
 	beforeAll(async () => {
 		const creds = await createAndLoginUser();
 		user = creds.user;
 		accessToken = creds.accessToken;
+
+		habit = await Habit.create({
+			name: "Read",
+			icon: "book",
+			color: "blue",
+			frequency: "daily",
+			amount: 1,
+			userId: user._id,
+		});
 	});
 
 	afterAll(async () => {
 		if (user) {
 			await User.deleteOne({ _id: user._id });
+		}
+
+		if (habit) {
+			await Habit.deleteOne({ _id: habit._id });
 		}
 	});
 
@@ -29,16 +44,6 @@ describe("/habits", () => {
 		});
 
 		it("it should get habits for user with a valid auth token ", async () => {
-			const habit = await Habit.create({
-				amount: 1,
-				name: "Exercise",
-				frequency: "daily",
-				dayOfWeek: [],
-				icon: "running",
-				color: "yellow",
-				userId: user ? user._id : undefined,
-			});
-
 			const resp = await request(app)
 				.get("/habits")
 				.set("Authorization", `Bearer ${accessToken}`);
@@ -47,8 +52,7 @@ describe("/habits", () => {
 			expect(resp.body).toHaveProperty("data");
 			expect(Array.isArray(resp.body.data)).toBe(true);
 			expect(resp.body.data).toHaveLength(1);
-			expect(resp.body.data[0]._id).toBe(habit._id.toString());
-			await Habit.deleteOne({ _id: habit._id });
+			expect(resp.body.data[0]._id).toBe((habit as IHabit)._id.toString());
 		});
 	});
 
@@ -89,6 +93,31 @@ describe("/habits", () => {
 			expect(resp.body.data).toHaveProperty("_id");
 
 			await Habit.deleteOne({ _id: resp.body.data._id });
+		});
+	});
+
+	describe("GET /habits/:habitId", () => {
+		it("should deny access if invalid auth token is passed", async () => {
+			const resp = await request(app)
+				.get(`/habits/${(habit as IHabit)._id}`)
+				.set("Authorization", `Bearer junktoken`);
+			expect(resp.status).toBe(401);
+		});
+		it("should return 404 error if habit cannot be found", async () => {
+			const newId = new mongoose.Types.ObjectId();
+			const resp = await request(app)
+				.get(`/habits/${newId.toString()}`)
+				.set("Authorization", `Bearer ${accessToken}`);
+			expect(resp.status).toBe(404);
+		});
+		it("should return user's habit successfully if it exists", async () => {
+			const resp = await request(app)
+				.get(`/habits/${(habit as IHabit)._id.toString()}`)
+				.set("Authorization", `Bearer ${accessToken}`);
+
+			expect(resp.status).toBe(200);
+			expect(resp.body).toHaveProperty("data");
+			expect(resp.body.data._id).toBe((habit as IHabit)._id.toString());
 		});
 	});
 });
