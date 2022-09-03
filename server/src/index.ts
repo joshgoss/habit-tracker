@@ -7,9 +7,11 @@ import Debug from "debug";
 // load config first since it also loads dotenv
 import config from "./config";
 import { connectDatabase, disconnectDatabase } from "./lib/database";
+
+import { jwtStrategy, googleStrategy } from "./auth/strategies";
 import authRoutes from "./auth/routes";
 import habitsRoutes from "./habits/routes";
-import { jwtStrategy, googleStrategy } from "./auth/strategies";
+import historyRoutes from "./history/routes";
 
 const serverDebug = Debug("server");
 
@@ -32,11 +34,12 @@ app.use(
 app.use(express.json());
 
 app.get("/healthcheck", (req: Request, res: Response) => {
-	res.json({ success: true });
+	res.json({ code: 200, success: true });
 });
 
 app.use("/auth", authRoutes);
 app.use("/habits", habitsRoutes);
+app.use("/history", historyRoutes);
 
 if (require.main === module) {
 	app.listen(config.PORT, () => {

@@ -1,10 +1,10 @@
 import { Router } from "express";
-import Debug from "debug";
 import passport from "passport";
 
 import { Habit } from "./models";
 import { ajv } from "../lib/validation";
 import { validateHabit } from "./middleware";
+import { Frequency } from "../constants";
 
 const router = Router();
 
@@ -31,7 +31,24 @@ router.post(
 
 		const valid = validate(req.body);
 		if (!valid) {
-			return res.status(422).json({ code: 422, errors: validate.errors });
+			return res.status(400).json({ code: 400, errors: validate.errors });
+		}
+
+		if (req.body.frequency === Frequency.Monthly && !req.body.dayOfMonth) {
+			return res.status(400).json({
+				code: 400,
+				error: "dayOfMonth is required when frequency is monthly",
+			});
+		}
+
+		if (
+			[Frequency.Weekly, Frequency.Daily].includes(req.body.frequency) &&
+			!req.body.daysOfWeek
+		) {
+			return res.status(400).json({
+				code: 400,
+				error: "daysOfMonth is required when frequency is weekly or daily",
+			});
 		}
 
 		const habit = await Habit.create({ ...req.body, userId: req.user._id });
@@ -63,6 +80,15 @@ router.put(
 	passport.authenticate("jwt", { session: false }),
 	validateHabit,
 	async (req, res) => {
+		const validate = ajv.getSchema("habit");
+
+		if (!validate) throw Error("Unable to get schema for habit");
+
+		const valid = validate(req.body);
+		if (!valid) {
+			return res.status(400).json({ code: 400, errors: validate.errors });
+		}
+
 		const habit = await Habit.findOneAndUpdate(
 			{
 				_id: req.habit._id,

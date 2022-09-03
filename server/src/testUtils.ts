@@ -1,6 +1,7 @@
 import { IUser, User } from "./users/models";
 import { faker } from "@faker-js/faker";
-import { AuthProvider, generateAccessToken } from "./auth/utils";
+import { generateAccessToken } from "./auth/utils";
+import { AuthProvider } from "./constants";
 
 interface TestCredentials {
 	user: IUser;

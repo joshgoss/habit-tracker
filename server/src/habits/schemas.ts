@@ -1,4 +1,4 @@
-import { DayOfWeek, Frequency } from "./models";
+import { DayOfWeek, Frequency } from "../constants";
 
 export const habit = {
 	type: "object",
