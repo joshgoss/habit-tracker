@@ -1,6 +1,6 @@
 import mongoosePkg from "mongoose";
 const { model, Schema } = mongoosePkg;
-import { AuthProvider } from "../auth/utils.js";
+import { AuthProvider } from "../constants";
 
 export interface IUser {
 	_id: string;
@@ -8,8 +8,8 @@ export interface IUser {
 	lastName: string;
 	provider: AuthProvider;
 	providerUserId: string;
-	createdAt: number;
-	updatedAt: number;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 const userSchema = new Schema<IUser>(

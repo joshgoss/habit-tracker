@@ -1,21 +1,6 @@
 import mongoosePkg from "mongoose";
+import { Frequency, DayOfWeek } from "../constants";
 const { model, Schema } = mongoosePkg;
-
-export enum Frequency {
-	Daily = "daily",
-	Weekly = "weekly",
-	Monthly = "monthly",
-}
-
-export enum DayOfWeek {
-	Monday = "mon",
-	Tuesday = "tue",
-	Wednesday = "wed",
-	Thursday = "thu",
-	Friday = "fri",
-	Saturday = "sat",
-	Sunday = "sun",
-}
 
 export interface IHabit {
 	_id: string;
@@ -27,8 +12,8 @@ export interface IHabit {
 	daysOfWeek: DayOfWeek[];
 	dayOfMonth: number;
 	userId: string;
-	createdAt: number;
-	updatedAt: number;
+	createdAt: Date;
+	updatedAt: Date;
 }
 
 const habitSchema = new Schema<IHabit>(

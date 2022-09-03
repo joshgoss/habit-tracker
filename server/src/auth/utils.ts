@@ -6,12 +6,6 @@ export interface JwtPayload {
 	provider: string;
 }
 
-export enum AuthProvider {
-	Apple = "Apple",
-	Github = "Github",
-	Google = "Google",
-}
-
 /**
  * Generate json web token
  * @param  {string} userId

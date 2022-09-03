@@ -1,7 +1,7 @@
 import { Request } from "express";
 import { Profile } from "passport-google-oauth20";
 import config from "../config";
-import { connectDatabase, disconnectDatabase } from "../database";
+import { connectDatabase, disconnectDatabase } from "../lib/database";
 import { verifyGoogle } from "./strategies";
 import { User } from "../users/models";
 import { createUser } from "../testUtils";

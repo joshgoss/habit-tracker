@@ -73,7 +73,7 @@ describe("/habits", () => {
 					daysOfWeek: [],
 				})
 				.set("Authorization", `Bearer ${accessToken}`);
-			expect(resp.status).toBe(422);
+			expect(resp.status).toBe(400);
 			expect(resp.body).toHaveProperty("errors");
 		});
 		it("should create a habit successfully with valid user and payload", async () => {

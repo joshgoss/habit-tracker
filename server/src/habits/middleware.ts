@@ -1,6 +1,14 @@
 import { Request, Response } from "express";
 import { Habit } from "./models";
 
+/**
+ * Middleware for handling routes with a habitId. It will check if the habit exists, belongs to
+ * the user and puts the habit on the request object for easy access
+ * @param req Express request instance
+ * @param res Express response instance
+ * @param next Next function to continue
+ * @returns
+ */
 export const validateHabit = async (
 	req: Request,
 	res: Response,
@@ -9,8 +17,8 @@ export const validateHabit = async (
 	const { habitId } = req.params;
 	if (!habitId) {
 		return res
-			.status(422)
-			.json({ code: 422, error: "habitId route param is required" });
+			.status(400)
+			.json({ code: 400, error: "habitId route param is required" });
 	}
 
 	if (!req.user) {
