@@ -24,7 +24,6 @@ export const apiFetch = async (options: ApiOptions) => {
 	const url = `${API_URL}${options.endpoint}${
 		queryString.toString() ? "?" + queryString.toString() : ""
 	}`;
-	console.log("url is: ", url);
 	const accessToken = getAccessToken();
 	const response = await fetch(url, {
 		body: options.body ? JSON.stringify(options.body) : undefined,

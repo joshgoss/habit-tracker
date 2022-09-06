@@ -1,4 +1,4 @@
-import LoginLayout from "./LoginLayout";
-import AppLayout from "./AppLayout";
+import LoginLayout from "./login/LoginLayout";
+import AppLayout from "./app/AppLayout";
 
 export { AppLayout, LoginLayout };

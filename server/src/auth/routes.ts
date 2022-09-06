@@ -44,15 +44,21 @@ router.get(
 			return res.status(401).json({ code: 401, error: "Not authorized" });
 		}
 		googleDebug("Generating accessToken...");
-		const accessToken = generateAccessToken({
-			sub: req.user._id,
-			provider: req.user.provider,
-		});
+		const accessToken = generateAccessToken(
+			{
+				sub: req.user._id,
+				provider: req.user.provider,
+			},
+			config.JWT_EXPIRES_IN
+		);
 		googleDebug(`accessToken is: ${accessToken}`);
 		googleDebug(`Redirecting to:  ${config.AUTH_SUCCESS_REDIRECT}`);
+		const expiresAt = Date.now() + config.JWT_EXPIRES_IN * 1000;
+		googleDebug("Expires at is: ", expiresAt);
+
 		res.redirect(
 			302,
-			`${config.AUTH_SUCCESS_REDIRECT}?accessToken=${accessToken}`
+			`${config.AUTH_SUCCESS_REDIRECT}?accessToken=${accessToken}&expiresAt=${expiresAt}`
 		);
 	}
 );

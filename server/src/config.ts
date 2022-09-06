@@ -21,10 +21,11 @@ const config = {
 	GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 	GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
 	HOST: process.env.HOST,
+	JWT_EXPIRES_IN: Number(process.env.JWT_EXPIRES_IN),
 	JWT_SECRET: process.env.JWT_SECRET,
 	MONGODB_URI: process.env.MONGODB_URI,
 	NODE_ENV: process.env.NODE_ENV || "development",
-	PORT: process.env.PORT,
+	PORT: Number(process.env.PORT),
 	TZ: process.env.TZ,
 };
 

@@ -1,9 +1,10 @@
 import React, { Suspense } from "react";
+import { Header } from "../layouts/app";
 
 const HomePage = () => {
 	return (
 		<Suspense fallback={<p>Loading...</p>}>
-			<h1>Home page</h1>
+			<Header>Today</Header>
 		</Suspense>
 	);
 };

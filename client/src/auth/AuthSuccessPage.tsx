@@ -10,14 +10,19 @@ const AuthSuccessPage = () => {
 	const [searchParams] = useSearchParams();
 	const setAuthState = useSetRecoilState(authState);
 	const accessToken = searchParams.get("accessToken");
+	const expiresAt = searchParams.get("expiresAt");
 
 	useEffect(() => {
 		if (accessToken) {
-			setAuthState((authState: object) => ({ ...authState, accessToken }));
-			setAccessToken(accessToken);
+			setAuthState((authState: object) => ({
+				...authState,
+				accessToken,
+				expiresAt: Number(expiresAt),
+			}));
+			setAccessToken(accessToken, Number(expiresAt));
 			navigate("/");
 		}
-	}, [accessToken, navigate, setAuthState]);
+	}, [accessToken, expiresAt, navigate, setAuthState]);
 
 	return <i className="fa-solid fa-spinner fa-spin fa-xl m-5"></i>;
 };
