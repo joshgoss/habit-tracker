@@ -2,6 +2,7 @@ import { IUser, User } from "./users/models";
 import { faker } from "@faker-js/faker";
 import { generateAccessToken } from "./auth/utils";
 import { AuthProvider } from "./constants";
+import config from "./config";
 
 interface TestCredentials {
 	user: IUser;
@@ -20,7 +21,13 @@ export const createUser = async (
 };
 
 export const loginUser = (user: IUser): string => {
-	return generateAccessToken({ sub: user._id, provider: user.provider });
+	return generateAccessToken(
+		{
+			sub: user._id,
+			provider: user.provider,
+		},
+		config.JWT_EXPIRES_IN
+	);
 };
 
 export const createAndLoginUser = async (

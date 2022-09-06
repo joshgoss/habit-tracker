@@ -2,7 +2,7 @@ import Debug from "debug";
 import passport from "passport";
 import { Request } from "express";
 import config from "../config";
-import { JwtPayload, generateAccessToken } from "./utils";
+import { JwtPayload } from "./utils";
 import { AuthProvider } from "../constants";
 import { User } from "../users/models";
 
