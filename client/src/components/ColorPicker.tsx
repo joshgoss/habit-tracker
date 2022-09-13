@@ -24,7 +24,7 @@ function ColorPicker({
 	return (
 		<ItemPicker
 			className={className}
-			defaultValue={randomDefault}
+			defaultValue={defaultValue || randomDefault}
 			defaultDisplay={
 				<div className="w-8 h-8" style={{ background: randomDefault }}></div>
 			}

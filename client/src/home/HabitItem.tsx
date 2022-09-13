@@ -1,26 +1,7 @@
+import { Habit, History } from "../types";
 interface Props {
-	habit: {
-		_id: string;
-		amount: number;
-		color: string;
-		createdAt: string;
-		daysOfWeek: string[];
-		dayOfMonth?: number;
-		frequency: string;
-		icon: string;
-		name: string;
-		userId: string;
-		updatedAt: string;
-	};
-	history?: {
-		amount: number;
-		completed: boolean;
-		createdAt: string;
-		date: string;
-		userId: string;
-		habitId: string;
-		updatedAt: string;
-	};
+	habit: Habit;
+	history?: History;
 }
 
 function HabitItem(props: Props) {

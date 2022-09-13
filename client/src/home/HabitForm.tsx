@@ -2,6 +2,10 @@ import React from "react";
 import { useSetRecoilState } from "recoil";
 import { useForm } from "react-hook-form";
 import api from "../utils/api";
+import colors from "../utils/colors";
+import icons from "../utils/icons";
+import { random } from "../utils";
+import { DayOfWeek, Frequency, Habit } from "../types";
 import { forceHabitsRefresh } from "./atoms";
 
 import {
@@ -17,12 +21,20 @@ interface Props {
 }
 
 function HabitForm(props: Props) {
+	const defaultValues: Habit = {
+		name: "",
+		amount: 1,
+		frequency: Frequency.Daily,
+		daysOfWeek: [],
+		color: colors[random(0, colors.length - 1)],
+		icon: icons[random(0, icons.length - 1)],
+	};
 	const {
 		register,
 		handleSubmit,
 		setValue,
 		formState: { isValid },
-	} = useForm({ mode: "onChange" });
+	} = useForm({ mode: "onChange", defaultValues });
 	const setForceHabitsRefresh = useSetRecoilState(forceHabitsRefresh);
 	const onSubmit = async (data: any) => {
 		await api.post("/habits", data);
@@ -48,9 +60,14 @@ function HabitForm(props: Props) {
 					<div className="flex space-x-4">
 						<IconPicker
 							required
+							defaultValue={defaultValues.icon}
 							onChange={(v: string): void => setValue("icon", v)}
 						/>
-						<ColorPicker required />
+						<ColorPicker
+							defaultValue={defaultValues.color}
+							onChange={(v: string): void => setValue("color", v)}
+							required
+						/>
 					</div>
 				</div>
 				<ButtonGroupInput
@@ -59,7 +76,7 @@ function HabitForm(props: Props) {
 					label="Days of Week"
 					defaultValue={[]}
 					multiple
-					onChange={(v: string | number | undefined) => {
+					onChange={(v: Array<DayOfWeek>) => {
 						setValue("daysOfWeek", v);
 					}}
 					required
@@ -77,17 +94,19 @@ function HabitForm(props: Props) {
 					className="col-span-2"
 					name="frequency"
 					label="Frequency"
-					defaultValue={["daily"]}
-					onChange={(v: Array<string | number>) => {
-						setValue("frequency", v.length ? v[0] : null);
+					defaultValue={[Frequency.Daily]}
+					onChange={(v: Array<Frequency>) => {
+						v.length && setValue("frequency", v[0]);
 					}}
 					required
 				>
-					<ButtonGroupInput.Button value="daily">Daily</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value="weekly">
+					<ButtonGroupInput.Button value={Frequency.Daily}>
+						Daily
+					</ButtonGroupInput.Button>
+					<ButtonGroupInput.Button value={Frequency.Weekly}>
 						Weekly
 					</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value="monthly">
+					<ButtonGroupInput.Button value={Frequency.Monthly}>
 						Monthly
 					</ButtonGroupInput.Button>
 				</ButtonGroupInput>
