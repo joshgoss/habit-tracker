@@ -1,8 +1,8 @@
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { fetchAccount } from "../../account/selectors";
+import { fetchAccount } from "../../auth/selectors";
 import { authState } from "../../auth/atoms";
-import { Dropdown, DropdownItem } from "../../components/Dropdown";
+import Dropdown from "../../components/Dropdown";
 import { clearAccessToken } from "../../utils/session";
 
 function TopBar() {
@@ -10,13 +10,13 @@ function TopBar() {
 	const navigate = useNavigate();
 	const setRecoilState = useSetRecoilState(authState);
 	return (
-		<div className="flow-root py-3">
+		<div className="flow-root py-3 mt-2 mb-3">
 			<span className="float-left font-bold leading-8 text-sky-500 text-lg">
 				Habit Tracker
 			</span>
 			<span className="float-right">
 				<Dropdown className="" title={account.firstName}>
-					<DropdownItem
+					<Dropdown.Item
 						onClick={(e) => {
 							e.preventDefault();
 							clearAccessToken();
@@ -29,7 +29,7 @@ function TopBar() {
 						}}
 					>
 						Logout
-					</DropdownItem>
+					</Dropdown.Item>
 				</Dropdown>
 			</span>
 		</div>
