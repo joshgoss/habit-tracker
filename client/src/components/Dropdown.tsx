@@ -43,9 +43,13 @@ export function Dropdown(props: MenuProps) {
 				</Menu.Button>
 			</div>
 
-			<Menu.Items className="border absolute w-full">
+			<Menu.Items className="border absolute w-full bg-white">
 				{props.children}
 			</Menu.Items>
 		</Menu>
 	);
 }
+
+Dropdown.Item = DropdownItem;
+
+export default Dropdown;
