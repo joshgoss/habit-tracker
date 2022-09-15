@@ -33,7 +33,7 @@ function HabitForm(props: Props) {
 		register,
 		handleSubmit,
 		setValue,
-		formState: { isValid },
+		formState: { isValid, isSubmitting },
 	} = useForm({ mode: "onChange", defaultValues });
 	const setForceHabitsRefresh = useSetRecoilState(forceHabitsRefresh);
 	const onSubmit = async (data: any) => {
@@ -112,19 +112,26 @@ function HabitForm(props: Props) {
 				</ButtonGroupInput>
 
 				<Input
-					{...register("amount", { required: true })}
+					{...register("amount", {
+						required: true,
+						min: 1,
+						valueAsNumber: true,
+					})}
+					required={true}
 					className="col-span-4"
 					label="Amount"
 					type="number"
-					defaultValue={1}
-					min={1}
-					required={true}
 					placeholder="1"
 				/>
 			</div>
 
 			<div className="flow-root mt-5">
-				<Button className="float-right" disabled={!isValid} type="submit">
+				<Button
+					className="float-right"
+					disabled={!isValid}
+					loading={isSubmitting}
+					type="submit"
+				>
 					Create
 				</Button>
 				<Button

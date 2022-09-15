@@ -13,3 +13,8 @@ export const forceHabitsRefresh = atom({
 	key: "forceHabitsRefresh",
 	default: 0,
 });
+
+export const forceHistoryRefresh = atom({
+	key: "forceHistoryRefresh",
+	default: 0,
+});

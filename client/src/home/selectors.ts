@@ -1,6 +1,10 @@
 import { selector } from "recoil";
 import api from "../utils/api";
-import { forceHabitsRefresh, historyParamsState } from "./atoms";
+import {
+	forceHabitsRefresh,
+	forceHistoryRefresh,
+	historyParamsState,
+} from "./atoms";
 import { Habit, History } from "../types";
 
 export const fetchHabits = selector({
@@ -15,6 +19,7 @@ export const fetchHabits = selector({
 export const fetchHistory = selector({
 	key: "fetchHistory",
 	get: async ({ get }): Promise<History[]> => {
+		get(forceHistoryRefresh);
 		const params = get(historyParamsState);
 		const response = await api.get("/history", params);
 		return response.data;
