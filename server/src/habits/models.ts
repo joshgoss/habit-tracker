@@ -10,7 +10,7 @@ export interface IHabit {
 	amount: number;
 	frequency: Frequency;
 	daysOfWeek: DayOfWeek[];
-	dayOfMonth: number;
+	dayOfMonth?: number;
 	userId: string;
 	createdAt: Date;
 	updatedAt: Date;

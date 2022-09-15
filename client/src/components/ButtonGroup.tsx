@@ -20,7 +20,6 @@ interface Context {
 const ButtonGroupContext = createContext({
 	selected: [],
 	changeSelected: (v: string | number) => {},
-	onChange: () => {},
 	defaultValue: [],
 } as Context);
 
@@ -30,7 +29,7 @@ interface ButtonProps {
 }
 
 export function Button({ children, value }: ButtonProps) {
-	const { changeSelected, onChange, selected } = useContext(ButtonGroupContext);
+	const { changeSelected, selected } = useContext(ButtonGroupContext);
 
 	return (
 		<button
@@ -44,10 +43,6 @@ export function Button({ children, value }: ButtonProps) {
 			onClick={(e) => {
 				e.preventDefault();
 				changeSelected(value);
-
-				if (onChange) {
-					onChange(selected);
-				}
 			}}
 		>
 			{children}
@@ -73,18 +68,21 @@ function ButtonGroup({
 	const [selected, setSelected] = useState(defaultValue);
 	const changeSelected = useCallback(
 		(v: string | number) => {
+			let updated: Array<string | number> = [];
+
 			if (!multiple) {
-				return setSelected([v]);
+				updated = [v];
+			} else if (selected.includes(v)) {
+				updated = selected.filter((s) => s !== v);
+			} else {
+				updated = [...selected, v];
 			}
 
-			if (selected.includes(v)) {
-				setSelected(selected.filter((s) => s !== v));
-			} else {
-				setSelected([...selected, v]);
-			}
+			setSelected(updated);
+			onChange && onChange(updated);
 			return v;
 		},
-		[multiple, selected, setSelected]
+		[multiple, onChange, selected, setSelected]
 	);
 
 	const contextValue = useMemo(

@@ -25,7 +25,7 @@ function IconPicker({
 	return (
 		<ItemPicker
 			className={className}
-			defaultValue={randomDefault}
+			defaultValue={defaultValue || randomDefault}
 			defaultDisplay={
 				<i className={`${classes} ${defaultValue || randomDefault}`} />
 			}

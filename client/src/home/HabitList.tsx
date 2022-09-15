@@ -8,10 +8,12 @@ function HabitList() {
 	const history = useRecoilValue(fetchHistory);
 
 	return (
-		<div>
+		<div className="mt-4 flex flex-col gap-y-3">
 			{habits.map((habit: any) => {
 				const habitHistory = history.find((h: any) => h.habitId === habit._id);
-				return <HabitItem habit={habit} history={habitHistory} />;
+				return (
+					<HabitItem key={habit._id} habit={habit} history={habitHistory} />
+				);
 			})}
 		</div>
 	);
