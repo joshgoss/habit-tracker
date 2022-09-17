@@ -141,14 +141,21 @@ router.put(
 		}
 
 		const habit = await Habit.findOne({
+			_id: req.body.habitId,
 			userId: req.user._id,
-			habitId: req.body.habitId,
 		});
 
 		if (!habit) {
 			return res
 				.status(422)
 				.json({ code: 422, error: "Habit does not exist for user" });
+		}
+
+		if (req.body.amount > habit.amount) {
+			return res.status(400).json({
+				code: 400,
+				error: "History amount cannot be greater than habit amount",
+			});
 		}
 
 		const history = await History.findOneAndUpdate(

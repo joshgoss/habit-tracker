@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useSetRecoilState, useRecoilState } from "recoil";
 import { Habit, History } from "../types";
-import { Button } from "../components";
+import { Button, Dropdown } from "../components";
 import { forceHistoryRefresh, historyParamsState } from "./atoms";
 import { setHistory } from "./utils";
+import api from "../utils/api";
+import HabitForm from "./HabitForm";
 
 interface Props {
 	habit: Habit;
@@ -26,12 +28,17 @@ function HabitItem({ habit, history }: Props) {
 
 	return (
 		<>
-			{editing && <div>editing</div>}
+			{editing && <HabitForm habit={habit} onClose={() => setEditing(false)} />}
 			{!editing && (
-				<div
-					className="rounded flex flex-row items-center h-16"
-					style={{ background: habit.color }}
-				>
+				<div className="rounded flex flex-row items-center h-16 relative border">
+					<div
+						className="absolute h-full"
+						style={{
+							background: habit.color,
+							zIndex: -1,
+							width: `${(amount / habit.amount) * 100}%`,
+						}}
+					></div>
 					<i className={`fa fa-solid ${habit.icon} text-3xl ml-4 mr-4`} />
 					<h3 className="text-xl grow">{habit.name}</h3>
 
@@ -130,11 +137,29 @@ function HabitItem({ habit, history }: Props) {
 						/>
 					)}
 
-					<Button
-						className="h-full flex-none"
-						icon="fa-solid fa-cog"
-						title="Change settings"
-					/>
+					<Dropdown className="h-full">
+						<Dropdown.Button className="h-full rounded-none">
+							<i className="fa fa-solid fa-cog" />
+						</Dropdown.Button>
+						<Dropdown.Items>
+							<Dropdown.Item
+								onClick={(e) => {
+									e.preventDefault();
+									setEditing(!editing);
+								}}
+							>
+								Edit
+							</Dropdown.Item>
+							<Dropdown.Item
+								onClick={async (e) => {
+									e.preventDefault();
+									await api.destroy(`/habits/${habit._id}`);
+								}}
+							>
+								Delete
+							</Dropdown.Item>
+						</Dropdown.Items>
+					</Dropdown>
 				</div>
 			)}
 		</>

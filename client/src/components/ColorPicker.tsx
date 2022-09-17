@@ -26,7 +26,10 @@ function ColorPicker({
 			className={className}
 			defaultValue={defaultValue || randomDefault}
 			defaultDisplay={
-				<div className="w-8 h-8" style={{ background: randomDefault }}></div>
+				<div
+					className="w-8 h-8"
+					style={{ background: defaultValue || randomDefault }}
+				></div>
 			}
 			label={label || "Color"}
 			name={name || "color"}
