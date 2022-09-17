@@ -1,6 +1,7 @@
 import React from "react";
 import { useSetRecoilState } from "recoil";
 import { useForm } from "react-hook-form";
+import * as R from "ramda";
 import api from "../utils/api";
 import colors from "../utils/colors";
 import icons from "../utils/icons";
@@ -17,10 +18,11 @@ import {
 } from "../components";
 
 interface Props {
+	habit?: Habit;
 	onClose?: Function;
 }
 
-function HabitForm(props: Props) {
+function HabitForm({ habit, onClose }: Props) {
 	const defaultValues: Habit = {
 		name: "",
 		amount: 1,
@@ -34,19 +36,32 @@ function HabitForm(props: Props) {
 		handleSubmit,
 		setValue,
 		formState: { isValid, isSubmitting },
-	} = useForm({ mode: "onChange", defaultValues });
+	} = useForm({
+		mode: "onChange",
+		defaultValues: habit
+			? R.pick(Object.keys(defaultValues), habit)
+			: defaultValues,
+	});
 	const setForceHabitsRefresh = useSetRecoilState(forceHabitsRefresh);
 	const onSubmit = async (data: any) => {
-		await api.post("/habits", data);
+		if (habit) {
+			await api.put(`/habits/${habit._id}`, data);
+		} else {
+			await api.post("/habits", data);
+		}
+
 		setForceHabitsRefresh((v) => v + 1);
 
-		if (props.onClose) {
-			props.onClose();
+		if (onClose) {
+			onClose();
 		}
 	};
 
 	return (
-		<form onSubmit={handleSubmit(onSubmit)}>
+		<form
+			className="bg-slate-100 p-5 border border-slate-300"
+			onSubmit={handleSubmit(onSubmit)}
+		>
 			<div className="grid grid-cols-12 gap-3">
 				<Input
 					className="col-span-10"
@@ -60,11 +75,11 @@ function HabitForm(props: Props) {
 					<div className="flex space-x-4">
 						<IconPicker
 							required
-							defaultValue={defaultValues.icon}
+							defaultValue={habit ? habit.icon : defaultValues.icon}
 							onChange={(v: string): void => setValue("icon", v)}
 						/>
 						<ColorPicker
-							defaultValue={defaultValues.color}
+							defaultValue={habit ? habit.color : defaultValues.color}
 							onChange={(v: string): void => setValue("color", v)}
 							required
 						/>
@@ -132,13 +147,13 @@ function HabitForm(props: Props) {
 					loading={isSubmitting}
 					type="submit"
 				>
-					Create
+					{habit ? "Save" : "Create"}
 				</Button>
 				<Button
 					className="float-right mr-2"
 					onClick={(e: any) => {
-						if (props.onClose) {
-							props.onClose();
+						if (onClose) {
+							onClose();
 						}
 					}}
 				>

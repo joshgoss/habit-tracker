@@ -2,7 +2,7 @@ import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
 import { fetchAccount } from "../../auth/selectors";
 import { authState } from "../../auth/atoms";
-import Dropdown from "../../components/Dropdown";
+import { Dropdown } from "../../components";
 import { clearAccessToken } from "../../utils/session";
 
 function TopBar() {
@@ -15,21 +15,24 @@ function TopBar() {
 				Habit Tracker
 			</span>
 			<span className="float-right">
-				<Dropdown className="" title={account.firstName}>
-					<Dropdown.Item
-						onClick={(e) => {
-							e.preventDefault();
-							clearAccessToken();
-							setRecoilState((state) => ({
-								...state,
-								accessToken: null,
-								expiresAt: null,
-							}));
-							navigate("/login");
-						}}
-					>
-						Logout
-					</Dropdown.Item>
+				<Dropdown className="">
+					<Dropdown.Button>{account.firstName}</Dropdown.Button>
+					<Dropdown.Items>
+						<Dropdown.Item
+							onClick={(e) => {
+								e.preventDefault();
+								clearAccessToken();
+								setRecoilState((state) => ({
+									...state,
+									accessToken: null,
+									expiresAt: null,
+								}));
+								navigate("/login");
+							}}
+						>
+							Logout
+						</Dropdown.Item>
+					</Dropdown.Items>
 				</Dropdown>
 			</span>
 		</div>
