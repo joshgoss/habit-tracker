@@ -1,6 +1,7 @@
 import Button from "./Button";
 import ButtonGroup from "./ButtonGroup";
 import ButtonGroupInput from "./ButtonGroupInput";
+import CalendarButton from "./CalendarButton";
 import ColorPicker from "./ColorPicker";
 import Dropdown from "./Dropdown";
 import IconPicker from "./IconPicker";
@@ -11,6 +12,7 @@ export {
 	Button,
 	ButtonGroup,
 	ButtonGroupInput,
+	CalendarButton,
 	ColorPicker,
 	Dropdown,
 	IconPicker,

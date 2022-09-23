@@ -1,11 +1,11 @@
 import { atom } from "recoil";
-import { formatDate, todayUtc } from "../utils/date";
+import { todayUtc } from "../utils/date";
 
 export const historyParamsState = atom({
 	key: "historyParamsState",
 	default: {
-		startDate: formatDate(todayUtc()),
-		endDate: formatDate(todayUtc()),
+		startDate: new Date(),
+		endDate: new Date(),
 	},
 });
 

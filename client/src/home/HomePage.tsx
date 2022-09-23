@@ -1,21 +1,32 @@
 import React, { Suspense, useState } from "react";
+import { useRecoilState } from "recoil";
 import { Header } from "../layouts/app";
-import { Button } from "../components";
+import { CalendarButton, Button } from "../components";
 import HabitList from "./HabitList";
 import HabitForm from "./HabitForm";
+import { historyParamsState } from "./atoms";
+import { formatDate } from "../utils/date";
 
 const HomePage = () => {
 	const [adding, setAdding] = useState(false);
+	const [historyState, setHistoryState] = useRecoilState(historyParamsState);
+	const formatted = formatDate(historyState.startDate);
+	const title = formatted === formatDate(new Date()) ? "Today" : formatted;
 
 	return (
 		<Suspense fallback={<p>Loading...</p>}>
 			<div className="flow-root mb-4">
-				<Header className="inline float-left">Today</Header>
-				<Button
+				<Header className="inline float-left">{title}</Header>
+				<CalendarButton
 					className="float-left ml-2 text-slate-600"
-					icon="fa fa-calendar-days"
-					onClick={() => {}}
-				></Button>
+					initialValue={formatted}
+					onChange={(date: string) => {
+						setHistoryState({
+							startDate: new Date(date),
+							endDate: new Date(date),
+						});
+					}}
+				/>
 
 				<Button
 					active={adding}

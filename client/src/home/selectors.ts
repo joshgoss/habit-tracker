@@ -6,6 +6,7 @@ import {
 	historyParamsState,
 } from "./atoms";
 import { Habit, History } from "../types";
+import { formatDate, toUtc } from "../utils/date";
 
 export const fetchHabits = selector({
 	key: "fetchHabits",
@@ -21,7 +22,10 @@ export const fetchHistory = selector({
 	get: async ({ get }): Promise<History[]> => {
 		get(forceHistoryRefresh);
 		const params = get(historyParamsState);
-		const response = await api.get("/history", params);
+		const response = await api.get("/history", {
+			startDate: formatDate(toUtc(params.startDate)),
+			endDate: formatDate(toUtc(params.endDate)),
+		});
 		return response.data;
 	},
 });

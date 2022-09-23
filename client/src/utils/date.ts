@@ -4,7 +4,15 @@
  * @returns {Date}
  */
 export const toUtc = (d: Date) => {
-	return new Date(d.toUTCString());
+	const utc = Date.UTC(
+		d.getUTCFullYear(),
+		d.getUTCMonth(),
+		d.getUTCDate(),
+		d.getUTCHours(),
+		d.getUTCMinutes(),
+		d.getUTCSeconds()
+	);
+	return new Date(utc);
 };
 
 /**
@@ -23,4 +31,8 @@ export const todayUtc = () => {
  */
 export const formatDate = (d: Date): string => {
 	return d.toISOString().split("T")[0];
+};
+
+export const toLocal = (d: Date) => {
+	return new Date(d.toLocaleDateString());
 };
