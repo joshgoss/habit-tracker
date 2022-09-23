@@ -4,7 +4,7 @@ type Props = {
 	active?: boolean;
 	className: string;
 	centered: boolean;
-	children?: string;
+	children?: any;
 	disabled?: boolean;
 	icon?: string;
 	loading?: boolean;

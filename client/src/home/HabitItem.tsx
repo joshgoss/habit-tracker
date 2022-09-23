@@ -4,6 +4,7 @@ import { Habit, History } from "../types";
 import { Button, Dropdown } from "../components";
 import { forceHistoryRefresh, historyParamsState } from "./atoms";
 import { setHistory } from "./utils";
+import { formatDate, toUtc } from "../utils/date";
 import api from "../utils/api";
 import HabitForm from "./HabitForm";
 
@@ -60,7 +61,7 @@ function HabitItem({ habit, history }: Props) {
 								await setHistory(
 									{
 										amount: amount - 1,
-										date: historyParams.startDate,
+										date: formatDate(toUtc(historyParams.startDate)),
 										habitId: habit._id as string,
 									},
 									historyId
@@ -82,7 +83,7 @@ function HabitItem({ habit, history }: Props) {
 									await setHistory(
 										{
 											amount: amount + 1,
-											date: historyParams.startDate,
+											date: formatDate(toUtc(historyParams.startDate)),
 											habitId: habit._id as string,
 										},
 										historyId
@@ -104,7 +105,7 @@ function HabitItem({ habit, history }: Props) {
 								await setHistory(
 									{
 										amount: habit.amount,
-										date: historyParams.startDate,
+										date: formatDate(toUtc(historyParams.startDate)),
 										habitId: habit._id as string,
 									},
 									historyId
@@ -126,7 +127,7 @@ function HabitItem({ habit, history }: Props) {
 								await setHistory(
 									{
 										amount: habit.amount - 1,
-										date: historyParams.startDate,
+										date: formatDate(toUtc(historyParams.startDate)),
 										habitId: habit._id as string,
 									},
 									historyId
