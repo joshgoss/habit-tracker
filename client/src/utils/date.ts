@@ -36,13 +36,3 @@ export const formatDate = (d: Date): string => {
 export const toLocal = (d: Date) => {
 	return new Date(d.toLocaleDateString());
 };
-
-/**
- * Convert string date to a UTC date object
- *
- * @param {string} str
- * @returns  {Date}
- */
-export const strToUtc = (str: string): Date => {
-	return new Date(`${str} UTC`);
-};
