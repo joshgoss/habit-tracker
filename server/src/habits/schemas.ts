@@ -13,7 +13,10 @@ export const habit = {
 		},
 		daysOfWeek: {
 			type: "array",
-			items: { type: "string", enum: Object.values(DayOfWeek) },
+			items: { type: "number", enum: Object.values(DayOfWeek) },
+			minItems: 1,
+			maxItems: 7,
+			uniqueItems: true,
 		},
 		dayOfMonth: { type: "number", nullable: true, minimum: 1, maximum: 31 },
 	},

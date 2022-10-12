@@ -1,43 +1,48 @@
 import React from "react";
+import { RegisterOptions } from "react-hook-form";
 import InputLabel from "./InputLabel";
 
 interface Props {
 	className?: string;
 	defaultValue?: any;
 	label?: string;
-	min?: number | string;
-	max?: number | string;
 	name: string;
-	onBlur: React.FocusEventHandler;
-	onChange: React.ChangeEventHandler;
 	placeholder?: string;
-	required?: boolean;
+	register: Function;
+	registerOptions: RegisterOptions;
 	type?: string;
 }
 
-const Input = React.forwardRef((props: Props, ref: any) => {
+const Input = ({
+	className,
+	defaultValue,
+	label,
+	name,
+	placeholder,
+	register,
+	registerOptions,
+	type,
+}: Props) => {
 	return (
-		<div className={props.className}>
-			{!!props.label && (
-				<InputLabel htmlFor={props.name} required={props.required}>
-					{props.label}
+		<div className={className}>
+			{!!label && (
+				<InputLabel
+					htmlFor={name}
+					required={registerOptions && registerOptions?.required}
+				>
+					{label}
 				</InputLabel>
 			)}
 			<input
 				className="border border-slate-300 rounded p-2 w-full"
-				name={props.name}
-				type={props.type || "text"}
-				defaultValue={props.defaultValue}
-				min={props.min}
-				max={props.max}
-				onBlur={props.onBlur}
-				onChange={props.onChange}
-				required={props.required}
-				placeholder={props.placeholder}
-				ref={ref}
+				defaultValue={defaultValue}
+				name={name}
+				placeholder={placeholder}
+				type={type || "text"}
+				{...register(name, registerOptions)}
 			/>
 		</div>
 	);
-});
+};
 
 export default Input;

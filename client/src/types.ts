@@ -54,3 +54,8 @@ export interface History {
 	createdAt: Date;
 	updatedAt: Date;
 }
+
+export interface HabitStreak {
+	habitId: string;
+	streak: number;
+}

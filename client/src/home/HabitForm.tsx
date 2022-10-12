@@ -1,6 +1,6 @@
 import React from "react";
 import { useSetRecoilState } from "recoil";
-import { useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import * as R from "ramda";
 import api from "../utils/api";
 import colors from "../utils/colors";
@@ -27,11 +27,12 @@ function HabitForm({ habit, onClose }: Props) {
 		name: "",
 		amount: 1,
 		frequency: Frequency.Daily,
-		daysOfWeek: [],
+		daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
 		color: colors[random(0, colors.length - 1)],
 		icon: icons[random(0, icons.length - 1)],
 	};
 	const {
+		control,
 		register,
 		handleSubmit,
 		setValue,
@@ -42,6 +43,7 @@ function HabitForm({ habit, onClose }: Props) {
 			? R.pick(Object.keys(defaultValues), habit)
 			: defaultValues,
 	});
+	const frequency = useWatch({ name: "frequency", control });
 	const setForceHabitsRefresh = useSetRecoilState(forceHabitsRefresh);
 	const onSubmit = async (data: any) => {
 		if (habit) {
@@ -52,9 +54,7 @@ function HabitForm({ habit, onClose }: Props) {
 
 		setForceHabitsRefresh((v) => v + 1);
 
-		if (onClose) {
-			onClose();
-		}
+		onClose && onClose();
 	};
 
 	return (
@@ -66,8 +66,9 @@ function HabitForm({ habit, onClose }: Props) {
 				<Input
 					className="col-span-10"
 					label="Name"
-					{...register("name", { required: true })}
-					required={true}
+					name="name"
+					register={register}
+					registerOptions={{ required: true }}
 					placeholder="My habit..."
 				/>
 
@@ -85,58 +86,95 @@ function HabitForm({ habit, onClose }: Props) {
 						/>
 					</div>
 				</div>
-				<ButtonGroupInput
-					className="col-span-3"
-					name="daysOfWeek"
-					label="Days of Week"
-					defaultValue={[]}
-					multiple
-					onChange={(v: Array<DayOfWeek>) => {
-						setValue("daysOfWeek", v);
-					}}
-					required
-				>
-					<ButtonGroupInput.Button value={0}>Mon</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value={1}>Tue</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value={2}>Wed</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value={3}>Thu</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value={4}>Fri</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value={5}>Sat</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value={6}>Sun</ButtonGroupInput.Button>
-				</ButtonGroupInput>
 
-				<ButtonGroupInput
-					className="col-span-2"
+				<Controller
+					control={control}
 					name="frequency"
-					label="Frequency"
-					defaultValue={[Frequency.Daily]}
-					onChange={(v: Array<Frequency>) => {
-						v.length && setValue("frequency", v[0]);
-					}}
-					required
-				>
-					<ButtonGroupInput.Button value={Frequency.Daily}>
-						Daily
-					</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value={Frequency.Weekly}>
-						Weekly
-					</ButtonGroupInput.Button>
-					<ButtonGroupInput.Button value={Frequency.Monthly}>
-						Monthly
-					</ButtonGroupInput.Button>
-				</ButtonGroupInput>
+					render={({ field: { onChange, value, name } }) => (
+						<ButtonGroupInput
+							className="col-span-2"
+							name="frequency"
+							label="Frequency"
+							onChange={(values: Array<Frequency>) => {
+								const v = values[0];
+								onChange(v);
+
+								if (v === Frequency.Daily) {
+									setValue("daysOfWeek", defaultValues.daysOfWeek);
+								} else if (v === Frequency.Weekly) {
+									setValue("daysOfWeek", [DayOfWeek.Monday]);
+								}
+							}}
+							required
+							selected={[value]}
+						>
+							<ButtonGroupInput.Button value={Frequency.Daily}>
+								Daily
+							</ButtonGroupInput.Button>
+							<ButtonGroupInput.Button value={Frequency.Weekly}>
+								Weekly
+							</ButtonGroupInput.Button>
+							<ButtonGroupInput.Button value={Frequency.Monthly}>
+								Monthly
+							</ButtonGroupInput.Button>
+						</ButtonGroupInput>
+					)}
+				/>
+
+				{(frequency === Frequency.Daily || frequency === Frequency.Weekly) && (
+					<Controller
+						control={control}
+						name="daysOfWeek"
+						render={({ field: { onChange, value, name } }) => (
+							<ButtonGroupInput
+								className="col-span-3"
+								name="daysOfWeek"
+								label="Days of Week"
+								multiple={frequency === Frequency.Daily}
+								onChange={(values: DayOfWeek[]) => {
+									setValue("daysOfWeek", values);
+								}}
+								selected={value}
+								required
+							>
+								<ButtonGroupInput.Button value={DayOfWeek.Sunday}>
+									Sun
+								</ButtonGroupInput.Button>
+								<ButtonGroupInput.Button value={DayOfWeek.Monday}>
+									Mon
+								</ButtonGroupInput.Button>
+								<ButtonGroupInput.Button value={DayOfWeek.Tuesday}>
+									Tue
+								</ButtonGroupInput.Button>
+								<ButtonGroupInput.Button value={DayOfWeek.Wednesday}>
+									Wed
+								</ButtonGroupInput.Button>
+								<ButtonGroupInput.Button value={DayOfWeek.Thursday}>
+									Thu
+								</ButtonGroupInput.Button>
+								<ButtonGroupInput.Button value={DayOfWeek.Friday}>
+									Fri
+								</ButtonGroupInput.Button>
+								<ButtonGroupInput.Button value={DayOfWeek.Saturday}>
+									Sat
+								</ButtonGroupInput.Button>
+							</ButtonGroupInput>
+						)}
+					/>
+				)}
 
 				<Input
-					{...register("amount", {
+					className="col-span-4"
+					label="Amount"
+					name="amount"
+					placeholder="1"
+					register={register}
+					registerOptions={{
 						required: true,
 						min: 1,
 						valueAsNumber: true,
-					})}
-					required={true}
-					className="col-span-4"
-					label="Amount"
+					}}
 					type="number"
-					placeholder="1"
 				/>
 			</div>
 
@@ -152,9 +190,7 @@ function HabitForm({ habit, onClose }: Props) {
 				<Button
 					className="float-right mr-2"
 					onClick={(e: any) => {
-						if (onClose) {
-							onClose();
-						}
+						onClose && onClose();
 					}}
 				>
 					Cancel

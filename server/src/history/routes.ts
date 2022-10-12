@@ -2,7 +2,7 @@ import passport from "passport";
 import { Router } from "express";
 import { Frequency } from "../constants";
 import { ajv } from "../lib/validation";
-import { History } from "./models";
+import { getStreaksForUser, History } from "./models";
 import { endOfDay, endOfToday, startOfDay, startOfToday } from "./utils";
 import { Habit } from "../habits/models";
 import { validateHistory } from "./middleware";
@@ -40,6 +40,7 @@ router.get(
 		return res.json({
 			code: 200,
 			data,
+			streaks: await getStreaksForUser(req.user._id, startOfDay(endDate)),
 		});
 	}
 );
@@ -83,25 +84,41 @@ router.post(
 		}
 
 		const requiresDaysOfWeek = [Frequency.Daily, Frequency.Weekly];
-		const hasDays = habit.daysOfWeek.length;
-		const isHabitDay = habit.daysOfWeek.includes(d.getDay());
-		if (
-			requiresDaysOfWeek.includes(habit.frequency) &&
-			hasDays &&
-			!isHabitDay
+		const isHabitDay = habit.daysOfWeek.includes(d.getUTCDay());
+		if (requiresDaysOfWeek.includes(req.body.frequency)) {
+			if (!isHabitDay) {
+				return res
+					.status(422)
+					.json({ code: 422, error: "Habit does not run on this day of week" });
+			} else if (!req.body.days.length) {
+				return res.status(422).json({
+					code: 422,
+					error:
+						"daysOfWeek must have at least one day when frequency is daily or weekly",
+				});
+			}
+		} else if (
+			req.body.frequency === Frequency.Weekly &&
+			req.body.daysOfWeek.length !== 1
 		) {
-			return res
-				.status(422)
-				.json({ code: 422, error: "Habit does not run on this day of week" });
-		}
-
-		if (
+			return res.status(422).json({
+				code: 422,
+				error: "daysOfWeek must only include one day when frequency is weekly",
+			});
+		} else if (
 			habit.frequency === Frequency.Monthly &&
-			habit.dayOfMonth !== d.getDate()
+			habit.dayOfMonth !== d.getUTCDate()
 		) {
 			return res.status(422).json({
 				code: 422,
 				error: "Habit does not run on this day of month",
+			});
+		}
+
+		if (req.body.amount > habit.amount) {
+			return res.status(422).json({
+				code: 422,
+				error: "Amount cannot be greater than habit amount",
 			});
 		}
 

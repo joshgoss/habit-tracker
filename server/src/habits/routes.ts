@@ -43,7 +43,7 @@ router.post(
 
 		if (
 			[Frequency.Weekly, Frequency.Daily].includes(req.body.frequency) &&
-			!req.body.daysOfWeek
+			(!req.body.daysOfWeek || !req.body.daysOfWeek.length)
 		) {
 			return res.status(400).json({
 				code: 400,

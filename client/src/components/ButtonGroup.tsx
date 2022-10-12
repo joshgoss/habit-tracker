@@ -1,26 +1,16 @@
 import classNames from "classnames";
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useMemo,
-	useState,
-} from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 
 type valueType = Array<string | number>;
 
 interface Context {
 	selected: valueType;
 	changeSelected: Function;
-	defaultValue: valueType;
-	multiple?: boolean;
-	onChange?: Function;
 }
 
 const ButtonGroupContext = createContext({
 	selected: [],
 	changeSelected: (v: string | number) => {},
-	defaultValue: [],
 } as Context);
 
 interface ButtonProps {
@@ -53,19 +43,18 @@ export function Button({ children, value }: ButtonProps) {
 interface GroupProps {
 	className?: string;
 	children: any;
-	defaultValue: valueType;
 	multiple?: boolean;
 	onChange?: Function;
+	selected: Array<string | number>;
 }
 
 function ButtonGroup({
 	className,
 	children,
-	defaultValue,
 	multiple,
 	onChange,
+	selected,
 }: GroupProps) {
-	const [selected, setSelected] = useState(defaultValue);
 	const changeSelected = useCallback(
 		(v: string | number) => {
 			let updated: Array<string | number> = [];
@@ -78,22 +67,18 @@ function ButtonGroup({
 				updated = [...selected, v];
 			}
 
-			setSelected(updated);
 			onChange && onChange(updated);
-			return v;
 		},
-		[multiple, onChange, selected, setSelected]
+		[multiple, onChange, selected]
 	);
 
 	const contextValue = useMemo(
 		() => ({
 			changeSelected,
-			defaultValue,
-			multiple,
 			selected,
 			onChange,
 		}),
-		[changeSelected, defaultValue, multiple, onChange, selected]
+		[changeSelected, onChange, selected]
 	);
 	return (
 		<ButtonGroupContext.Provider value={contextValue}>

@@ -4,6 +4,11 @@ export enum AuthProvider {
 	Google = "Google",
 }
 
+export interface HabitStreak {
+	habitId: string;
+	streak: number;
+}
+
 export enum Frequency {
 	Daily = "daily",
 	Weekly = "weekly",

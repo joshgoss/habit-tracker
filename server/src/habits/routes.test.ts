@@ -21,6 +21,7 @@ describe("/habits", () => {
 			color: "blue",
 			frequency: "daily",
 			amount: 1,
+			daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
 			userId: user._id,
 		});
 	});

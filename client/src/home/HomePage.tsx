@@ -5,13 +5,15 @@ import { CalendarButton, Button } from "../components";
 import HabitList from "./HabitList";
 import HabitForm from "./HabitForm";
 import { historyParamsState } from "./atoms";
-import { formatDate } from "../utils/date";
+import { formatDate } from "../utils";
 
 const HomePage = () => {
 	const [adding, setAdding] = useState(false);
 	const [historyState, setHistoryState] = useRecoilState(historyParamsState);
-	const formatted = formatDate(historyState.startDate);
-	const title = formatted === formatDate(new Date()) ? "Today" : formatted;
+	const title =
+		historyState.endDate === formatDate(new Date())
+			? "Today"
+			: historyState.endDate;
 
 	return (
 		<Suspense fallback={<p>Loading...</p>}>
@@ -19,11 +21,11 @@ const HomePage = () => {
 				<Header className="inline float-left">{title}</Header>
 				<CalendarButton
 					className="float-left ml-2 text-slate-600"
-					initialValue={formatted}
+					initialValue={historyState.endDate}
 					onChange={(date: string) => {
 						setHistoryState({
-							startDate: new Date(date),
-							endDate: new Date(date),
+							startDate: formatDate(new Date(date)),
+							endDate: formatDate(new Date(date)),
 						});
 					}}
 				/>
