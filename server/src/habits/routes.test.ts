@@ -86,7 +86,7 @@ describe("/habits", () => {
 					color: "red",
 					icon: "sun",
 					frequency: "daily",
-					daysOfWeek: [],
+					daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
 				})
 				.set("Authorization", `Bearer ${accessToken}`);
 			expect(resp.status).toBe(201);
@@ -143,6 +143,7 @@ describe("/habits", () => {
 				color: "red",
 				frequency: "daily",
 				amount: 2,
+				daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
 				userId: (user as IUser)._id,
 			});
 			const resp = await request(app)

@@ -112,24 +112,26 @@ export const getStreaksForUser = async (
 			streaksDebug(`streak is: ${habitStreak.streak}`);
 			streaksDebug(`nextDate is: ${nextDate.toUTCString()}`);
 
-			const curStr = curDate.toUTCString();
-			if (
-				entry.date < nextDate ||
-				(curStr === nextDate.toUTCString() &&
-					!entry.completed &&
-					curStr !== endDate.toUTCString())
-			) {
-				streaksDebug(`entry.date < nextDate: ${entry.date < nextDate}`);
+			let shouldIncrement = true;
+
+			// Entry is on end date so allow streak to continue even if it isn't completed yet
+			if (curDate.toUTCString() === endDate.toUTCString() && !entry.completed) {
 				streaksDebug(
-					`Is it next date and not completed? ${
-						curDate.toUTCString() == nextDate.toUTCString() && !entry.completed
-					}`
+					"Entry date matches end date so skipping enforcing entry being complete"
 				);
-				streaksDebug(
-					"entry date < next Date or entry is on next date but not completed"
-				);
-				return acc;
+				shouldIncrement = false;
 			} else if (
+				curDate.toUTCString() === nextDate.toUTCString() &&
+				!entry.completed
+			) {
+				streaksDebug("Entry not completed");
+				return acc;
+			} else if (entry.date < nextDate) {
+				streaksDebug("Entry date is before expected next date... streak ended");
+				return acc;
+			}
+
+			if (
 				habit.frequency === Frequency.Daily ||
 				habit.frequency === Frequency.Weekly
 			) {
@@ -154,7 +156,10 @@ export const getStreaksForUser = async (
 			}
 
 			streaksDebug("Incrementing streak");
-			habitStreak.streak = habitStreak.streak + 1;
+			habitStreak.streak = shouldIncrement
+				? habitStreak.streak + 1
+				: habitStreak.streak;
+			shouldIncrement = true;
 		}
 
 		return acc;

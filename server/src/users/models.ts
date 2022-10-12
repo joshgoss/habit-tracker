@@ -8,6 +8,7 @@ export interface IUser {
 	lastName: string;
 	provider: AuthProvider;
 	providerUserId: string;
+	timezone: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -18,6 +19,7 @@ const userSchema = new Schema<IUser>(
 		lastName: { type: String, required: true },
 		provider: { type: String, required: true },
 		providerUserId: { type: String, required: true },
+		timezone: { type: String, required: true, default: "America/New_York" },
 	},
 	{ timestamps: true }
 );
