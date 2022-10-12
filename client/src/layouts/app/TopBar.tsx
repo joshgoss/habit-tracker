@@ -1,6 +1,6 @@
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { useNavigate } from "react-router-dom";
-import { fetchAccount } from "../../auth/selectors";
+import { fetchAccount } from "../../account/selectors";
 import { authState } from "../../auth/atoms";
 import { Dropdown } from "../../components";
 import { clearAccessToken } from "../../utils/session";
@@ -18,6 +18,14 @@ function TopBar() {
 				<Dropdown className="">
 					<Dropdown.Button>{account.firstName}</Dropdown.Button>
 					<Dropdown.Items>
+						<Dropdown.Item
+							onClick={(e) => {
+								e.preventDefault();
+								navigate("/settings");
+							}}
+						>
+							Settings
+						</Dropdown.Item>
 						<Dropdown.Item
 							onClick={(e) => {
 								e.preventDefault();
