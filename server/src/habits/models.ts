@@ -23,7 +23,7 @@ const habitSchema = new Schema<IHabit>(
 		color: { type: String, required: true },
 		amount: { type: Number, required: true },
 		frequency: { type: String, required: true },
-		daysOfWeek: [{ type: String }],
+		daysOfWeek: [{ type: Number }],
 		dayOfMonth: { type: Number },
 		userId: Schema.Types.ObjectId,
 	},

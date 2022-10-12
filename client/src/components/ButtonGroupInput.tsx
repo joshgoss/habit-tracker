@@ -4,30 +4,30 @@ import Label from "./InputLabel";
 interface Props {
 	children: any;
 	className?: string;
-	defaultValue: Array<string | number>;
 	label?: string;
 	multiple?: boolean;
 	name: string;
 	onChange?: Function;
 	required?: boolean;
+	selected: Array<string | number>;
 }
 
 function ButtonGroupInput({
 	className,
 	children,
-	defaultValue,
 	label,
 	multiple,
 	name,
 	onChange,
 	required,
+	selected,
 }: Props) {
 	return (
 		<ButtonGroup
 			className={className}
-			defaultValue={defaultValue}
 			multiple={multiple}
 			onChange={onChange}
+			selected={selected}
 		>
 			{!!label && (
 				<Label htmlFor={name} required={required}>

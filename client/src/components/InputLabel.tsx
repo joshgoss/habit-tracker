@@ -1,10 +1,11 @@
 import classNames from "classnames";
+import { ValidationRule } from "react-hook-form";
 
 interface Props {
 	className?: string;
 	children: any;
 	htmlFor: string;
-	required?: boolean;
+	required?: boolean | string | ValidationRule<boolean>;
 	error?: boolean;
 }
 

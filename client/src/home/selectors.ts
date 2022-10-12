@@ -6,7 +6,6 @@ import {
 	historyParamsState,
 } from "./atoms";
 import { Habit, History } from "../types";
-import { formatDate, toUtc } from "../utils/date";
 
 export const fetchHabits = selector({
 	key: "fetchHabits",
@@ -19,14 +18,17 @@ export const fetchHabits = selector({
 
 export const fetchHistory = selector({
 	key: "fetchHistory",
-	get: async ({ get }): Promise<History[]> => {
+	get: async ({ get }) => {
 		get(forceHistoryRefresh);
 		const params = get(historyParamsState);
 		const response = await api.get("/history", {
-			startDate: formatDate(toUtc(params.startDate)),
-			endDate: formatDate(toUtc(params.endDate)),
+			startDate: params.startDate,
+			endDate: params.endDate,
 		});
-		return response.data;
+		return {
+			data: response.data,
+			streaks: response.streaks,
+		};
 	},
 });
 
@@ -34,10 +36,12 @@ export const getCompletedHabits = selector({
 	key: "completedHabits",
 	get: ({ get }) => {
 		const habits = get(fetchHabits);
-		const history = get(fetchHistory);
+		const { data } = get(fetchHistory);
 
 		return habits.filter((habit) => {
-			const entries = history.filter((item) => item.habitId === habit._id);
+			const entries = data.filter(
+				(item: History) => item.habitId === habit._id
+			);
 			const entry = entries.length ? entries[0] : null;
 			return entry && entry.completed ? true : false;
 		});
@@ -48,10 +52,12 @@ export const getUncompletedHabits = selector({
 	key: "uncompletedHabits",
 	get: ({ get }) => {
 		const habits = get(fetchHabits);
-		const history = get(fetchHistory);
+		const { data } = get(fetchHistory);
 
 		return habits.filter((habit) => {
-			const entries = history.filter((item) => item.habitId === habit._id);
+			const entries = data.filter(
+				(item: History) => item.habitId === habit._id
+			);
 			const entry = entries.length ? entries[0] : null;
 			return !entry || !entry.completed ? true : false;
 		});

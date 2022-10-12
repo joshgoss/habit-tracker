@@ -4,16 +4,17 @@ import { Habit, History } from "../types";
 import { Button, Dropdown } from "../components";
 import { forceHistoryRefresh, historyParamsState } from "./atoms";
 import { setHistory } from "./utils";
-import { formatDate, toUtc } from "../utils/date";
+import { formatDate } from "../utils";
 import api from "../utils/api";
 import HabitForm from "./HabitForm";
 
 interface Props {
 	habit: Habit;
 	history?: History;
+	streak?: number;
 }
 
-function HabitItem({ habit, history }: Props) {
+function HabitItem({ habit, history, streak }: Props) {
 	const [editing, setEditing] = useState(false);
 	const [minusing, setMinusing] = useState(false);
 	const [adding, setAdding] = useState(false);
@@ -51,6 +52,15 @@ function HabitItem({ habit, history }: Props) {
 						<p className="text-center text-xl text-gray-800">{habit.amount}</p>
 					</div>
 
+					{!!streak && (
+						<div className="w-15 h-full bg-gray-700 px-3 py-1 align-middle">
+							<i className="fa fa-fire text-2xl text-center  text-amber-400	align-middle block" />
+							<p className="text-xs text-center text-amber-400 font-bold">
+								{streak} days
+							</p>
+						</div>
+					)}
+
 					{amount > 0 && !completed && (
 						<Button
 							className="h-full"
@@ -61,7 +71,7 @@ function HabitItem({ habit, history }: Props) {
 								await setHistory(
 									{
 										amount: amount - 1,
-										date: formatDate(toUtc(historyParams.startDate)),
+										date: historyParams.startDate,
 										habitId: habit._id as string,
 									},
 									historyId
@@ -83,7 +93,7 @@ function HabitItem({ habit, history }: Props) {
 									await setHistory(
 										{
 											amount: amount + 1,
-											date: formatDate(toUtc(historyParams.startDate)),
+											date: historyParams.startDate,
 											habitId: habit._id as string,
 										},
 										historyId
@@ -105,7 +115,7 @@ function HabitItem({ habit, history }: Props) {
 								await setHistory(
 									{
 										amount: habit.amount,
-										date: formatDate(toUtc(historyParams.startDate)),
+										date: historyParams.startDate,
 										habitId: habit._id as string,
 									},
 									historyId
@@ -127,7 +137,7 @@ function HabitItem({ habit, history }: Props) {
 								await setHistory(
 									{
 										amount: habit.amount - 1,
-										date: formatDate(toUtc(historyParams.startDate)),
+										date: historyParams.startDate,
 										habitId: habit._id as string,
 									},
 									historyId
