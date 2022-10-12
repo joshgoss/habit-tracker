@@ -12,6 +12,7 @@ import { jwtStrategy, googleStrategy } from "./auth/strategies";
 import authRoutes from "./auth/routes";
 import habitsRoutes from "./habits/routes";
 import historyRoutes from "./history/routes";
+import timezoneRoutes from "./timezones/routes";
 
 const serverDebug = Debug("server");
 
@@ -40,6 +41,7 @@ app.get("/healthcheck", (req: Request, res: Response) => {
 app.use("/auth", authRoutes);
 app.use("/habits", habitsRoutes);
 app.use("/history", historyRoutes);
+app.use("/timezones", timezoneRoutes);
 
 if (require.main === module) {
 	app.listen(config.PORT, () => {
