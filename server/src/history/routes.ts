@@ -1,3 +1,4 @@
+import { DateTime } from "luxon";
 import passport from "passport";
 import { Router } from "express";
 import { Frequency } from "../constants";
@@ -22,25 +23,38 @@ router.get(
 			return res.status(422).json({ code: 422, errors: validate.errors });
 		}
 
+		const defaultDate = DateTime.fromJSDate(new Date(), {
+			zone: req.user.timezone,
+		}).toJSDate();
+
 		const startDate = req.query.startDate
-			? startOfDay(new Date(req.query.startDate as string))
-			: startOfToday();
+			? DateTime.fromISO(req.query.startDate as string, {
+					zone: req.user.timezone,
+			  }).toJSDate()
+			: defaultDate;
+
 		const endDate = req.query.endDate
-			? endOfDay(new Date(req.query.endDate as string))
-			: endOfToday();
+			? DateTime.fromISO(req.query.endDate as string, {
+					zone: req.user.timezone,
+			  }).toJSDate()
+			: defaultDate;
 
 		const data = await History.find({
 			userId: req.user._id,
 			date: {
-				$gte: startDate,
-				$lte: endDate,
+				$gte: startOfDay(startDate),
+				$lte: endOfDay(endDate),
 			},
 		});
 
 		return res.json({
 			code: 200,
 			data,
-			streaks: await getStreaksForUser(req.user._id, startOfDay(endDate)),
+			streaks: await getStreaksForUser(
+				req.user._id,
+				startOfDay(endDate),
+				req.user.timezone
+			),
 		});
 	}
 );
@@ -69,11 +83,14 @@ router.post(
 			});
 		}
 
-		const d = new Date(req.body.date);
+		const d = DateTime.fromJSDate(new Date(req.body.date), {
+			zone: req.user.timezone,
+		});
+
 		const existing = await History.findOne({
 			habitId: req.body.habitId,
 			userId: req.user._id,
-			date: startOfDay(new Date(req.body.date)),
+			date: startOfDay(d.toJSDate()),
 		});
 
 		if (existing) {
@@ -84,7 +101,7 @@ router.post(
 		}
 
 		const requiresDaysOfWeek = [Frequency.Daily, Frequency.Weekly];
-		const isHabitDay = habit.daysOfWeek.includes(d.getUTCDay());
+		const isHabitDay = habit.daysOfWeek.includes(d.weekday);
 		if (requiresDaysOfWeek.includes(req.body.frequency)) {
 			if (!isHabitDay) {
 				return res
@@ -107,7 +124,7 @@ router.post(
 			});
 		} else if (
 			habit.frequency === Frequency.Monthly &&
-			habit.dayOfMonth !== d.getUTCDate()
+			habit.dayOfMonth !== d.day
 		) {
 			return res.status(422).json({
 				code: 422,
@@ -124,7 +141,7 @@ router.post(
 
 		const history = await History.create({
 			amount: req.body.amount,
-			date: d,
+			date: startOfDay(d.toJSDate()),
 			userId: req.user._id,
 			habitId: habit._id,
 			completed: habit.amount === req.body.amount,

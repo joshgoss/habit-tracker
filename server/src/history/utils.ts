@@ -12,7 +12,7 @@ import { History, IHistory } from "./models";
  * @returns {Date}
  */
 export const startOfDay = (d: Date): Date => {
-	d.setUTCHours(0, 0, 0, 0);
+	d.setHours(0, 0, 0, 0);
 	return d;
 };
 
@@ -23,7 +23,7 @@ export const startOfDay = (d: Date): Date => {
  * @returns {Date}
  */
 export const endOfDay = (d: Date): Date => {
-	d.setUTCHours(23, 59, 59, 999);
+	d.setHours(23, 59, 59, 999);
 	return d;
 };
 
@@ -74,8 +74,8 @@ export const getDaysDiff = (d1: Date, d2: Date): number => {
 
 /**
  * Find the closest previous date based on supported days of week passed
- * @param date {Date} The start date
- * @param daysOfWeek {DayOfWeek[]} The days of week the previous day must be on
+ * @param {Date} date  The start date
+ * @param {DayOfWeek[]} daysOfWeek  The days of week the previous day must be on
  * @returns {Date}
  */
 export const closestPrevDate = (date: Date, daysOfWeek: DayOfWeek[]): Date => {
@@ -95,4 +95,14 @@ export const closestPrevDate = (date: Date, daysOfWeek: DayOfWeek[]): Date => {
 	}
 
 	return addDays(date, -distance);
+};
+
+/**
+ * Convert date to another time zone
+ * @param {Date} date
+ * @param {string} timezone
+ * @returns {Date}
+ */
+export const toTimezone = (date: Date, timezone: string) => {
+	return new Date(date.toLocaleString("en-US", { timeZone: timezone }));
 };
