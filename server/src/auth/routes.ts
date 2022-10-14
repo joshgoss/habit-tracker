@@ -2,6 +2,8 @@ import Debug from "debug";
 import { Router } from "express";
 import passport from "passport";
 import config from "../config";
+import { ajv } from "../lib/validation";
+import { User } from "../users/models";
 import { generateAccessToken } from "./utils";
 
 const router = Router();
@@ -18,6 +20,38 @@ router.get(
 				.status(401)
 				.json({ code: 401, error: "Invalid auth token provided" });
 		}
+
+		return res.json({ code: 200, data: req.user });
+	}
+);
+
+router.put(
+	"/me",
+	passport.authenticate("jwt", { session: false }),
+	async (req, res) => {
+		if (!req.user) {
+			return res
+				.status(401)
+				.json({ code: 401, error: "Invalid auth token provided" });
+		}
+
+		const validate = ajv.getSchema("account");
+		if (!validate) throw new Error("Unable to history schema");
+
+		const valid = validate(req.body);
+		if (!valid) {
+			return res.status(400).json({ code: 400, errors: validate.errors });
+		}
+
+		await User.updateOne(
+			{
+				_id: req.user._id,
+			},
+			{ $set: { timezone: req.body.timezone } }
+		);
+
+		req.user.timezone = req.body.timezone;
+		await req.user.save();
 
 		return res.json({ code: 200, data: req.user });
 	}

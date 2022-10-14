@@ -16,7 +16,7 @@ export const createUser = async (
 		firstName: faker.name.firstName(),
 		lastName: faker.name.lastName(),
 		provider: authProvider,
-		providerUserId: faker.random.numeric(),
+		providerUserId: faker.datatype.uuid(),
 	});
 };
 

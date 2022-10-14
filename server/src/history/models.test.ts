@@ -1,10 +1,10 @@
+import { DateTime } from "luxon";
 import config from "../config";
 import { Frequency, DayOfWeek } from "../constants";
 import { connectDatabase, disconnectDatabase } from "../lib/database";
 import { History, getStreaksForUser } from "./models";
 import { IUser, User } from "../users/models";
 import { Habit, IHabit } from "../habits/models";
-import { addDays, startOfDay } from "./utils";
 import { createUser } from "../testUtils";
 import { habit } from "../habits/schemas";
 
@@ -30,7 +30,7 @@ describe("getStreaksForUser()", () => {
 				frequency: Frequency.Daily,
 				icon: "Dumbbells",
 				color: "blue",
-				daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+				daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
 				userId: user._id,
 			});
 		});
@@ -40,7 +40,11 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("should return a streak of 0 with no history", async () => {
-			const streaks = await getStreaksForUser(user._id, startOfDay(new Date()));
+			const streaks = await getStreaksForUser(
+				user._id,
+				DateTime.now().setZone(user.timezone).toJSDate(),
+				user.timezone
+			);
 
 			expect(streaks.length).toBe(1);
 			const habitStreak = streaks.find(
@@ -51,18 +55,23 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("should correctly calculated a streak for a habit with consecutive days", async () => {
-			const date = startOfDay(new Date());
+			const date = DateTime.now().setZone(user.timezone);
+
 			const rows = [...Array(10).keys()].map((n) => ({
 				habitId: habit._id,
 				userId: user._id,
 				amount: 1,
 				completed: true,
-				date: n ? addDays(date, -n) : date,
+				date: n ? date.minus(n).toJSDate() : date.toJSDate(),
 			}));
 
 			await History.insertMany(rows);
 
-			const streaks = await getStreaksForUser(user._id, date);
+			const streaks = await getStreaksForUser(
+				user._id,
+				date.toJSDate(),
+				user.timezone
+			);
 			expect(streaks).toHaveLength(1);
 
 			const habitStreak = streaks.find(
@@ -75,19 +84,23 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("should correctly end streak if gap in history", async () => {
-			const date = startOfDay(new Date());
+			const date = DateTime.now().setZone(user.timezone);
 			const notCompletedIndex = 3;
 			const rows = [...Array(4).keys()].map((n, index) => ({
 				habitId: habit._id,
 				userId: user._id,
 				amount: 1,
 				completed: index !== notCompletedIndex,
-				date: n ? addDays(date, -n) : date,
+				date: n ? date.plus({ days: -n }).toJSDate() : date.toJSDate(),
 			}));
 
 			await History.insertMany(rows);
 
-			const streaks = await getStreaksForUser(user._id, date);
+			const streaks = await getStreaksForUser(
+				user._id,
+				date.toJSDate(),
+				user.timezone
+			);
 			expect(streaks).toHaveLength(1);
 
 			const habitStreak = streaks.find(
@@ -100,27 +113,39 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("should handle gap between end date and most recent history entry", async () => {
-			const futureDate = addDays(startOfDay(new Date()), 60);
-			const today = startOfDay(new Date());
+			const today = DateTime.now().setZone(user.timezone);
+			const future = today.plus({ days: 60 });
 			const data = {
 				habitId: habit._id,
 				userId: user._id,
 				amount: 1,
 				completed: true,
-				date: today,
 			};
 
-			await History.create(data);
-			await History.create({ ...data, date: addDays(today, 1) });
-			await History.create({ ...data, date: addDays(today, 2) });
-			await History.create({ ...data, date: addDays(today, 3) });
+			await History.create({ ...data, date: future.toJSDate() });
+			await History.create({
+				...data,
+				date: today.toJSDate(),
+			});
+			await History.create({
+				...data,
+				date: today.plus({ days: 1 }).toJSDate(),
+			});
+			await History.create({
+				...data,
+				date: today.plus({ days: 2 }).toJSDate(),
+			});
 
-			const streaks = await getStreaksForUser(user._id, futureDate);
+			const streaks = await getStreaksForUser(
+				user._id,
+				future.toJSDate(),
+				user.timezone
+			);
 			const habitStreak = streaks.find(
 				(s) => s.habitId.toString() === habit._id.toString()
 			);
 
-			expect(habitStreak?.streak).toBe(0);
+			expect(habitStreak?.streak).toBe(1);
 
 			await History.deleteMany({ habitId: habit._id });
 		});
@@ -146,7 +171,11 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("should return a streak of 0 with no history", async () => {
-			const streaks = await getStreaksForUser(user._id, startOfDay(new Date()));
+			const streaks = await getStreaksForUser(
+				user._id,
+				new Date(),
+				user.timezone
+			);
 
 			expect(streaks.length).toBe(1);
 			const habitStreak = streaks.find(
@@ -157,7 +186,9 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("should correctly calculated a streak for a habit with consecutive weeks", async () => {
-			const date = startOfDay(new Date("2022-10-12"));
+			const date = DateTime.fromISO("2022-10-12", {
+				zone: user.timezone,
+			});
 			const data = {
 				habitId: habit._id,
 				userId: user._id,
@@ -165,13 +196,17 @@ describe("getStreaksForUser()", () => {
 				completed: true,
 			};
 			const rows = [
-				{ ...data, date },
-				{ ...data, date: addDays(date, -7) },
-				{ ...data, date: addDays(date, -14) },
+				{ ...data, date: date.toJSDate() },
+				{ ...data, date: date.minus({ weeks: 1 }).toJSDate() },
+				{ ...data, date: date.minus({ weeks: 2 }).toJSDate() },
 			];
 			await History.insertMany(rows);
 
-			const streaks = await getStreaksForUser(user._id, date);
+			const streaks = await getStreaksForUser(
+				user._id,
+				date.toJSDate(),
+				user.timezone
+			);
 			expect(streaks).toHaveLength(1);
 
 			const habitStreak = streaks.find(
@@ -184,7 +219,7 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("Should correctly end streak with gaps in history ", async () => {
-			const date = startOfDay(new Date("2022-10-12"));
+			const date = DateTime.fromISO("2022-10-12", { zone: user.timezone });
 			const data = {
 				habitId: habit._id,
 				userId: user._id,
@@ -192,15 +227,24 @@ describe("getStreaksForUser()", () => {
 				completed: true,
 			};
 			const rows = [
-				{ ...data, date },
-				{ ...data, date: addDays(date, -7) },
-				{ ...data, date: addDays(date, -14) },
-				{ ...data, date: addDays(date, -21), amount: 0, completed: false },
-				{ ...data, date: addDays(date, -28) },
+				{ ...data, date: date.toJSDate() },
+				{ ...data, date: date.minus({ weeks: 1 }).toJSDate() },
+				{ ...data, date: date.minus({ weeks: 2 }).toJSDate() },
+				{
+					...data,
+					date: date.minus({ weeks: 3 }).toJSDate(),
+					amount: 0,
+					completed: false,
+				},
+				{ ...data, date: date.minus({ weeks: 4 }).toJSDate() },
 			];
 			await History.insertMany(rows);
 
-			const streaks = await getStreaksForUser(user._id, date);
+			const streaks = await getStreaksForUser(
+				user._id,
+				date.toJSDate(),
+				user.timezone
+			);
 			expect(streaks).toHaveLength(1);
 
 			const habitStreak = streaks.find(
@@ -234,7 +278,7 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("should correctly calculated a streak for a habit with consecutive months", async () => {
-			const date = startOfDay(new Date("2022-10-01"));
+			const date = DateTime.fromISO("2022-10-01", { zone: user.timezone });
 			const data = {
 				habitId: habit._id,
 				userId: user._id,
@@ -242,13 +286,17 @@ describe("getStreaksForUser()", () => {
 				completed: true,
 			};
 			const rows = [
-				{ ...data, date },
-				{ ...data, date: startOfDay(new Date("2022-09-01")) },
-				{ ...data, date: startOfDay(new Date("2022-08-01")) },
+				{ ...data, date: date.toJSDate() },
+				{ ...data, date: date.minus({ months: 1 }).toJSDate() },
+				{ ...data, date: date.minus({ months: 2 }).toJSDate() },
 			];
 			await History.insertMany(rows);
 
-			const streaks = await getStreaksForUser(user._id, date);
+			const streaks = await getStreaksForUser(
+				user._id,
+				date.toJSDate(),
+				user.timezone
+			);
 			expect(streaks).toHaveLength(1);
 
 			const habitStreak = streaks.find(
@@ -261,7 +309,7 @@ describe("getStreaksForUser()", () => {
 		});
 
 		it("should correctly end streak for a habit with gaps in history", async () => {
-			const date = startOfDay(new Date("2022-10-01"));
+			const date = DateTime.fromISO("2022-10-01", { zone: user.timezone });
 			const data = {
 				habitId: habit._id,
 				userId: user._id,
@@ -269,21 +317,25 @@ describe("getStreaksForUser()", () => {
 				completed: true,
 			};
 			const rows = [
-				{ ...data, date },
-				{ ...data, date: startOfDay(new Date("2022-09-01")) },
-				{ ...data, date: startOfDay(new Date("2022-08-01")) },
+				{ ...data, date: date.toJSDate() },
+				{ ...data, date: date.minus({ months: 1 }).toJSDate() },
+				{ ...data, date: date.minus({ months: 2 }).toJSDate() },
 				{
 					...data,
-					date: startOfDay(new Date("2022-07-01")),
+					date: date.minus({ months: 3 }).toJSDate(),
 					amount: 0,
 					completed: false,
 				},
-				{ ...data, date: startOfDay(new Date("2022-06-01")) },
-				{ ...data, date: startOfDay(new Date("2022-05-01")) },
+				{ ...data, date: date.minus({ months: 4 }).toJSDate() },
+				{ ...data, date: date.minus({ months: 5 }).toJSDate() },
 			];
 			await History.insertMany(rows);
 
-			const streaks = await getStreaksForUser(user._id, date);
+			const streaks = await getStreaksForUser(
+				user._id,
+				date.toJSDate(),
+				user.timezone
+			);
 			expect(streaks).toHaveLength(1);
 
 			const habitStreak = streaks.find(

@@ -1,17 +1,17 @@
 import React, { Suspense, useState } from "react";
 import { useRecoilState } from "recoil";
+import { DateTime } from "luxon";
 import { Header } from "../layouts/app";
 import { CalendarButton, Button } from "../components";
 import HabitList from "./HabitList";
 import HabitForm from "./HabitForm";
 import { historyParamsState } from "./atoms";
-import { formatDate } from "../utils";
 
 const HomePage = () => {
 	const [adding, setAdding] = useState(false);
 	const [historyState, setHistoryState] = useRecoilState(historyParamsState);
 	const title =
-		historyState.endDate === formatDate(new Date())
+		historyState.endDate === DateTime.now().toISODate()
 			? "Today"
 			: historyState.endDate;
 
@@ -24,8 +24,8 @@ const HomePage = () => {
 					initialValue={historyState.endDate}
 					onChange={(date: string) => {
 						setHistoryState({
-							startDate: formatDate(new Date(date)),
-							endDate: formatDate(new Date(date)),
+							startDate: DateTime.fromISO(date).toISODate(),
+							endDate: DateTime.fromISO(date).toISODate(),
 						});
 					}}
 				/>

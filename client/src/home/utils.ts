@@ -11,7 +11,7 @@ export const setHistory = async (
 	historyId?: string | null
 ) => {
 	if (historyId) {
-		return await api.put(`/history/${historyId}`, data);
+		return await api.put(`/history/${historyId}`, { amount: data.amount });
 	} else {
 		return await api.post(`/history`, data);
 	}

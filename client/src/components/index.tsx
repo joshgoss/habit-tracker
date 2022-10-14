@@ -7,6 +7,8 @@ import Dropdown from "./Dropdown";
 import IconPicker from "./IconPicker";
 import Input from "./Input";
 import ItemPicker from "./ItemPicker";
+import SelectInput from "./SelectInput";
+import TimeZoneSelect from "./TimeZoneSelect";
 
 export {
 	Button,
@@ -18,4 +20,6 @@ export {
 	IconPicker,
 	Input,
 	ItemPicker,
+	SelectInput,
+	TimeZoneSelect,
 };

@@ -4,7 +4,6 @@ import { Habit, History } from "../types";
 import { Button, Dropdown } from "../components";
 import { forceHistoryRefresh, historyParamsState } from "./atoms";
 import { setHistory } from "./utils";
-import { formatDate } from "../utils";
 import api from "../utils/api";
 import HabitForm from "./HabitForm";
 

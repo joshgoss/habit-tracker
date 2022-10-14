@@ -6,6 +6,7 @@ import "./index.css";
 import { AppLayout, LoginLayout } from "./layouts";
 import { AuthSuccessPage, LoginPage } from "./auth";
 import { HomePage } from "./home";
+import SettingsPage from "./settings/SettingsPage";
 import reportWebVitals from "./reportWebVitals";
 
 const root = ReactDOM.createRoot(
@@ -23,6 +24,7 @@ root.render(
 					</Route>
 					<Route element={<AppLayout />}>
 						<Route path="/" element={<HomePage />} />
+						<Route path="/settings" element={<SettingsPage />} />
 					</Route>
 				</Routes>
 			</BrowserRouter>

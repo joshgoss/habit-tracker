@@ -1,11 +1,11 @@
 import request from "supertest";
 import mongoose from "mongoose";
+import { DateTime } from "luxon";
 import app from "../index";
 import { IHistory, History } from "./models";
 import { Habit, IHabit } from "../habits/models";
 import { createAndLoginUser } from "../testUtils";
 import { IUser, User } from "../users/models";
-import { startOfDay, startOfToday } from "./utils";
 
 describe("/history", () => {
 	let user: IUser | undefined;
@@ -24,10 +24,11 @@ describe("/history", () => {
 			color: "black",
 			frequency: "daily",
 			userId: user._id,
-			daysOfWeek: [],
+			daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
 		});
+
 		history = await History.create({
-			date: startOfToday(),
+			date: DateTime.now().setZone(user.timezone).toJSDate(),
 			completed: true,
 			amount: 1,
 			habitId: habit._id,
@@ -58,8 +59,6 @@ describe("/history", () => {
 			expect(resp.body).toHaveProperty("data");
 			expect(resp.body.data[0]._id).toBe((history as IHistory)._id.toString());
 		});
-
-		it("should be able to query habits on different start and end dates", async () => {});
 	});
 
 	describe("POST /history", () => {
@@ -92,21 +91,20 @@ describe("/history", () => {
 				userId: (user as IUser)._id,
 				color: "red",
 			});
-			const date = startOfDay(new Date("2018/10/09"));
+			const date = DateTime.fromISO("2018-10-09", { zone: user?.timezone });
 			const existingHistory: IHistory = await History.create({
 				amount: 1,
 				completed: true,
-				date: date,
+				date: date.toISO(),
 				habitId: habit2._id,
 				userId: (user as IUser)._id,
 			});
-
 			const resp = await request(app)
 				.post("/history")
 				.send({
 					amount: 1,
 					habitId: habit2._id,
-					date: date.toISOString().split("T")[0],
+					date: date.toISODate(),
 				})
 				.set("Authorization", `Bearer ${accessToken}`);
 
@@ -122,7 +120,9 @@ describe("/history", () => {
 				.send({
 					amount: 1,
 					habitId: (habit as IHabit)._id.toString(),
-					date: new Date("2022-08-11").toISOString().split("T")[0],
+					date: DateTime.fromISO("2022-08-11", {
+						zone: user?.timezone,
+					}).toISODate(),
 				})
 				.set("Authorization", `Bearer ${accessToken}`);
 			expect(resp.status).toBe(201);
@@ -157,11 +157,11 @@ describe("/history", () => {
 		});
 
 		it("should delete a user's history entry", async () => {
-			const date = startOfDay(new Date("2018/05/09"));
+			const date = DateTime.fromISO("2018-05-09", { zone: user?.timezone });
 			const history2: IHistory = await History.create({
 				amount: 1,
 				completed: true,
-				date: date,
+				date: date.toJSDate(),
 				habitId: (habit as IHabit)._id,
 				userId: (user as IUser)._id,
 			});
@@ -188,7 +188,9 @@ describe("/history", () => {
 				.send({
 					amount: 0,
 					habitId: (habit as IHabit)._id,
-					date: (history as IHistory).date.toISOString().split("T")[0],
+					date: DateTime.fromISO((history as IHistory).date.toISOString(), {
+						zone: user?.timezone,
+					}).toISODate(),
 				})
 				.set("Authorization", `Bearer ${accessToken}`);
 			expect(resp.status).toBe(200);

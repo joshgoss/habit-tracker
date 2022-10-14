@@ -27,7 +27,7 @@ function HabitForm({ habit, onClose }: Props) {
 		name: "",
 		amount: 1,
 		frequency: Frequency.Daily,
-		daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+		daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
 		color: colors[random(0, colors.length - 1)],
 		icon: icons[random(0, icons.length - 1)],
 	};

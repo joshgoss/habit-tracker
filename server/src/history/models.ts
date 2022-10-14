@@ -1,11 +1,12 @@
 import Debug from "debug";
 import * as R from "ramda";
+import { DateTime } from "luxon";
 
 import mongoosePkg from "mongoose";
 const { model, Schema } = mongoosePkg;
 import { IHabit, Habit } from "../habits/models";
 import { Frequency, HabitStreak, DayOfWeek } from "../constants";
-import { addDays, getDaysDiff, closestPrevDate, startOfDay } from "./utils";
+import { closestPrevDate, prefixNum } from "./utils";
 
 export interface IHistory {
 	_id: string;
@@ -40,8 +41,10 @@ export const History = model<IHistory>("History", historySchema);
 const streaksDebug = Debug("history.models:getStreaksForUser");
 export const getStreaksForUser = async (
 	userId: string,
-	endDate: Date
+	endDate: Date,
+	timezone: string
 ): Promise<HabitStreak[]> => {
+	const luxonDate = DateTime.fromJSDate(endDate);
 	const history = await History.find({
 		userId: userId,
 		date: { $lte: endDate },
@@ -50,13 +53,10 @@ export const getStreaksForUser = async (
 		date: -1,
 	});
 	streaksDebug(`userId is: ${userId}`);
-	streaksDebug(`endDate is: ${endDate}`);
-
+	streaksDebug(`endDate is: `, luxonDate);
 	const habits = await Habit.find({ userId });
 	const byHabitId = R.groupBy((h: IHistory) => h.habitId);
 	const grouped = byHabitId(history);
-
-	streaksDebug("Grouped entries by habit: ", grouped);
 
 	return habits.reduce((acc: HabitStreak[], habit: IHabit) => {
 		streaksDebug(`habit is: `, habit);
@@ -79,82 +79,86 @@ export const getStreaksForUser = async (
 		}
 
 		// The next date which must be matched to continue the steak;
-		let nextDate = endDate;
+		let nextDate = luxonDate;
 		let daysOfWeek = habit.daysOfWeek.sort();
+
+		streaksDebug("daysofWeeks: ", daysOfWeek);
 
 		if (
 			habit.frequency === Frequency.Daily ||
 			habit.frequency === Frequency.Weekly
 		) {
 			streaksDebug("Habit frequency is daily or weekly");
-			const endDay = endDate.getUTCDay();
+			const endDay = luxonDate.weekday;
 
-			nextDate = daysOfWeek.includes(endDay)
-				? endDate
-				: closestPrevDate(endDate, daysOfWeek);
+			if (daysOfWeek.includes(endDay)) {
+				nextDate = luxonDate;
+			} else {
+				nextDate = closestPrevDate(luxonDate, daysOfWeek);
+			}
 		} else if (habit.frequency === Frequency.Monthly) {
-			streaksDebug("Habit frequency is daily or weekly");
-			nextDate = startOfDay(
-				new Date(
-					`${endDate.getUTCFullYear()}-${endDate.getUTCMonth() + 1}-${
-						habit.dayOfMonth
-					}`
-				)
+			streaksDebug("Habit frequency is monthly");
+			nextDate = DateTime.fromObject(
+				{
+					day: luxonDate.day,
+					month: luxonDate.month,
+					year: luxonDate.year,
+				},
+				{ zone: timezone }
 			);
 		}
 
 		for (let i = 0; i < entries.length; i++) {
 			const entry = entries[i];
-			const curDate = entry.date;
+			const curDate = DateTime.fromJSDate(entry.date, { zone: timezone });
+			const endDateDiff = luxonDate.diff(curDate, "days").toObject().days;
 
 			streaksDebug("Entry is: ", entry);
-			streaksDebug(`curDate is ${curDate.toUTCString()}`);
+			streaksDebug(`curDate is ${curDate.toString()}`);
 			streaksDebug(`streak is: ${habitStreak.streak}`);
-			streaksDebug(`nextDate is: ${nextDate.toUTCString()}`);
+			streaksDebug(`nextDate is: ${nextDate.toString()}`);
+			streaksDebug(`Cur date days diff from end date: ${endDateDiff}`);
 
-			const curStr = curDate.toUTCString();
-			if (
-				entry.date < nextDate ||
-				(curStr === nextDate.toUTCString() &&
-					!entry.completed &&
-					curStr !== endDate.toUTCString())
-			) {
-				streaksDebug(`entry.date < nextDate: ${entry.date < nextDate}`);
+			let shouldIncrement = true;
+
+			// Entry is on end date so allow streak to continue even if it isn't completed yet
+			if (curDate.toISODate() === luxonDate.toISODate() && !entry.completed) {
 				streaksDebug(
-					`Is it next date and not completed? ${
-						curDate.toUTCString() == nextDate.toUTCString() && !entry.completed
-					}`
+					"Entry date matches end date so skipping enforcing entry being complete"
 				);
-				streaksDebug(
-					"entry date < next Date or entry is on next date but not completed"
-				);
+				shouldIncrement = false;
+			} else if (curDate.toISO() === nextDate.toISO() && !entry.completed) {
+				streaksDebug("Entry not completed");
 				return acc;
-			} else if (
+			} else if (curDate < nextDate && endDateDiff && endDateDiff > 1) {
+				streaksDebug("Entry date is before expected next date... streak ended");
+				return acc;
+			}
+
+			if (
 				habit.frequency === Frequency.Daily ||
 				habit.frequency === Frequency.Weekly
 			) {
-				const curDayOfWeek = curDate.getUTCDay();
+				const curDayOfWeek = curDate.weekday;
 
 				streaksDebug("Frequency is daily or weekly");
-				if (!habit.daysOfWeek.includes(curDayOfWeek)) {
+				if (!daysOfWeek.includes(curDayOfWeek)) {
 					streaksDebug(
 						"Entry is not on week day the habit expects, skipping..."
 					);
 					continue;
 				} else {
-					nextDate = closestPrevDate(curDate, habit.daysOfWeek);
+					nextDate = closestPrevDate(curDate, daysOfWeek);
 				}
 			} else if (habit.frequency === Frequency.Monthly) {
-				const month = nextDate.getUTCMonth() + 1;
-				nextDate = startOfDay(
-					new Date(
-						`${nextDate.getUTCFullYear()}-${month - 1}-${habit.dayOfMonth}`
-					)
-				);
+				nextDate = nextDate.minus({ months: 1 });
 			}
 
 			streaksDebug("Incrementing streak");
-			habitStreak.streak = habitStreak.streak + 1;
+			habitStreak.streak = shouldIncrement
+				? habitStreak.streak + 1
+				: habitStreak.streak;
+			shouldIncrement = true;
 		}
 
 		return acc;

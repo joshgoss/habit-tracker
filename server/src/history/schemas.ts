@@ -15,3 +15,11 @@ export const history = {
 	},
 	required: ["habitId", "amount", "date"],
 };
+
+export const updateHistory = {
+	type: "object",
+	properties: {
+		amount: { type: "number", minimum: 0 },
+	},
+	required: ["amount"],
+};

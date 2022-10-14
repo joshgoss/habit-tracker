@@ -1,11 +1,11 @@
 import { atom } from "recoil";
-import { formatDate } from "../utils";
+import { DateTime } from "luxon";
 
 export const historyParamsState = atom({
 	key: "historyParamsState",
 	default: {
-		startDate: formatDate(new Date()),
-		endDate: formatDate(new Date()),
+		startDate: DateTime.now().toISODate(),
+		endDate: DateTime.now().toISODate(),
 	},
 });
 
