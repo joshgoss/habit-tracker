@@ -4,7 +4,6 @@ import { Router } from "express";
 import { Frequency } from "../constants";
 import { ajv } from "../lib/validation";
 import { getStreaksForUser, History } from "./models";
-import { endOfDay, endOfToday, startOfDay, startOfToday } from "./utils";
 import { Habit } from "../habits/models";
 import { validateHistory } from "./middleware";
 
@@ -23,27 +22,24 @@ router.get(
 			return res.status(422).json({ code: 422, errors: validate.errors });
 		}
 
-		const defaultDate = DateTime.fromJSDate(new Date(), {
-			zone: req.user.timezone,
-		}).toJSDate();
+		const defaultDate = DateTime.now().setZone(req.user.timezone);
 
 		const startDate = req.query.startDate
 			? DateTime.fromISO(req.query.startDate as string, {
 					zone: req.user.timezone,
-			  }).toJSDate()
+			  })
 			: defaultDate;
-
 		const endDate = req.query.endDate
 			? DateTime.fromISO(req.query.endDate as string, {
 					zone: req.user.timezone,
-			  }).toJSDate()
+			  })
 			: defaultDate;
 
 		const data = await History.find({
 			userId: req.user._id,
 			date: {
-				$gte: startOfDay(startDate),
-				$lte: endOfDay(endDate),
+				$gte: startDate.set({ hour: 0, minute: 0, second: 0 }).toJSDate(),
+				$lte: endDate.set({ hour: 23, minute: 59, second: 59 }).toJSDate(),
 			},
 		});
 
@@ -52,7 +48,7 @@ router.get(
 			data,
 			streaks: await getStreaksForUser(
 				req.user._id,
-				startOfDay(endDate),
+				endDate.toJSDate(),
 				req.user.timezone
 			),
 		});
@@ -83,14 +79,13 @@ router.post(
 			});
 		}
 
-		const d = DateTime.fromJSDate(new Date(req.body.date), {
+		const d = DateTime.fromISO(req.body.date, {
 			zone: req.user.timezone,
 		});
-
 		const existing = await History.findOne({
 			habitId: req.body.habitId,
 			userId: req.user._id,
-			date: startOfDay(d.toJSDate()),
+			date: d.toJSDate(),
 		});
 
 		if (existing) {
@@ -138,10 +133,9 @@ router.post(
 				error: "Amount cannot be greater than habit amount",
 			});
 		}
-
 		const history = await History.create({
 			amount: req.body.amount,
-			date: startOfDay(d.toJSDate()),
+			date: d.toJSDate(),
 			userId: req.user._id,
 			habitId: habit._id,
 			completed: habit.amount === req.body.amount,
@@ -165,7 +159,7 @@ router.put(
 	passport.authenticate("jwt", { session: false }),
 	validateHistory,
 	async (req, res) => {
-		const validate = ajv.getSchema("history");
+		const validate = ajv.getSchema("updateHistory");
 
 		if (!validate) throw Error("Unable to get schema for history");
 
@@ -175,7 +169,7 @@ router.put(
 		}
 
 		const habit = await Habit.findOne({
-			_id: req.body.habitId,
+			_id: req.history.habitId,
 			userId: req.user._id,
 		});
 

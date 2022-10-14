@@ -36,7 +36,7 @@ describe("Test Strategies", () => {
 			expect(provider).toBe("Google");
 			expect(providerUserId).toBe(googleId);
 
-			await User.deleteOne({ provider: "Google", providerUserId: googleId });
+			await User.deleteOne({ _id: found?._id });
 		});
 
 		it("should not create duplicate records if the user has already logged in", async () => {

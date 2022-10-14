@@ -6,7 +6,7 @@ import mongoosePkg from "mongoose";
 const { model, Schema } = mongoosePkg;
 import { IHabit, Habit } from "../habits/models";
 import { Frequency, HabitStreak, DayOfWeek } from "../constants";
-import { addDays, getDaysDiff, closestPrevDate, startOfDay } from "./utils";
+import { closestPrevDate, prefixNum } from "./utils";
 
 export interface IHistory {
 	_id: string;
@@ -53,12 +53,10 @@ export const getStreaksForUser = async (
 		date: -1,
 	});
 	streaksDebug(`userId is: ${userId}`);
-	streaksDebug(`endDate is: ${endDate}`);
+	streaksDebug(`endDate is: `, luxonDate);
 	const habits = await Habit.find({ userId });
 	const byHabitId = R.groupBy((h: IHistory) => h.habitId);
 	const grouped = byHabitId(history);
-
-	streaksDebug("Grouped entries by habit: ", grouped);
 
 	return habits.reduce((acc: HabitStreak[], habit: IHabit) => {
 		streaksDebug(`habit is: `, habit);
@@ -81,8 +79,10 @@ export const getStreaksForUser = async (
 		}
 
 		// The next date which must be matched to continue the steak;
-		let nextDate = DateTime.fromJSDate(endDate);
+		let nextDate = luxonDate;
 		let daysOfWeek = habit.daysOfWeek.sort();
+
+		streaksDebug("daysofWeeks: ", daysOfWeek);
 
 		if (
 			habit.frequency === Frequency.Daily ||
@@ -91,15 +91,19 @@ export const getStreaksForUser = async (
 			streaksDebug("Habit frequency is daily or weekly");
 			const endDay = luxonDate.weekday;
 
-			nextDate = daysOfWeek.includes(endDay)
-				? luxonDate
-				: DateTime.fromJSDate(
-						closestPrevDate(luxonDate.toJSDate(), daysOfWeek)
-				  );
+			if (daysOfWeek.includes(endDay)) {
+				nextDate = luxonDate;
+			} else {
+				nextDate = closestPrevDate(luxonDate, daysOfWeek);
+			}
 		} else if (habit.frequency === Frequency.Monthly) {
-			streaksDebug("Habit frequency is daily or weekly");
-			nextDate = DateTime.fromJSDate(
-				new Date(`${luxonDate.year}-${luxonDate.month}-${habit.dayOfMonth}`),
+			streaksDebug("Habit frequency is monthly");
+			nextDate = DateTime.fromObject(
+				{
+					day: luxonDate.day,
+					month: luxonDate.month,
+					year: luxonDate.year,
+				},
 				{ zone: timezone }
 			);
 		}
@@ -107,16 +111,18 @@ export const getStreaksForUser = async (
 		for (let i = 0; i < entries.length; i++) {
 			const entry = entries[i];
 			const curDate = DateTime.fromJSDate(entry.date, { zone: timezone });
+			const endDateDiff = luxonDate.diff(curDate, "days").toObject().days;
 
 			streaksDebug("Entry is: ", entry);
-			streaksDebug(`curDate is ${curDate}`);
+			streaksDebug(`curDate is ${curDate.toString()}`);
 			streaksDebug(`streak is: ${habitStreak.streak}`);
-			streaksDebug(`nextDate is: ${nextDate}`);
+			streaksDebug(`nextDate is: ${nextDate.toString()}`);
+			streaksDebug(`Cur date days diff from end date: ${endDateDiff}`);
 
 			let shouldIncrement = true;
 
 			// Entry is on end date so allow streak to continue even if it isn't completed yet
-			if (curDate.toISO() === luxonDate.toISO() && !entry.completed) {
+			if (curDate.toISODate() === luxonDate.toISODate() && !entry.completed) {
 				streaksDebug(
 					"Entry date matches end date so skipping enforcing entry being complete"
 				);
@@ -124,7 +130,7 @@ export const getStreaksForUser = async (
 			} else if (curDate.toISO() === nextDate.toISO() && !entry.completed) {
 				streaksDebug("Entry not completed");
 				return acc;
-			} else if (curDate < nextDate) {
+			} else if (curDate < nextDate && endDateDiff && endDateDiff > 1) {
 				streaksDebug("Entry date is before expected next date... streak ended");
 				return acc;
 			}
@@ -134,8 +140,6 @@ export const getStreaksForUser = async (
 				habit.frequency === Frequency.Weekly
 			) {
 				const curDayOfWeek = curDate.weekday;
-				console.log("days of week is: ", daysOfWeek);
-				console.log("curDayofWeek is: ", curDayOfWeek);
 
 				streaksDebug("Frequency is daily or weekly");
 				if (!daysOfWeek.includes(curDayOfWeek)) {
@@ -144,14 +148,10 @@ export const getStreaksForUser = async (
 					);
 					continue;
 				} else {
-					nextDate = DateTime.fromJSDate(
-						closestPrevDate(curDate.toJSDate(), daysOfWeek)
-					);
+					nextDate = closestPrevDate(curDate, daysOfWeek);
 				}
 			} else if (habit.frequency === Frequency.Monthly) {
-				nextDate = DateTime.fromJSDate(
-					new Date(`${nextDate.year}-${nextDate.month - 1}-${habit.dayOfMonth}`)
-				);
+				nextDate = nextDate.minus({ months: 1 });
 			}
 
 			streaksDebug("Incrementing streak");

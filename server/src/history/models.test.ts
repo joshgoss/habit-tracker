@@ -5,7 +5,6 @@ import { connectDatabase, disconnectDatabase } from "../lib/database";
 import { History, getStreaksForUser } from "./models";
 import { IUser, User } from "../users/models";
 import { Habit, IHabit } from "../habits/models";
-import { addDays, startOfDay } from "./utils";
 import { createUser } from "../testUtils";
 import { habit } from "../habits/schemas";
 
@@ -123,23 +122,23 @@ describe("getStreaksForUser()", () => {
 				completed: true,
 			};
 
-			await History.create({ ...data, date: startOfDay(future.toJSDate()) });
+			await History.create({ ...data, date: future.toJSDate() });
 			await History.create({
 				...data,
-				date: startOfDay(today.toJSDate()),
+				date: today.toJSDate(),
 			});
 			await History.create({
 				...data,
-				date: startOfDay(today.plus({ days: 1 }).toJSDate()),
+				date: today.plus({ days: 1 }).toJSDate(),
 			});
 			await History.create({
 				...data,
-				date: startOfDay(today.plus({ days: 2 }).toJSDate()),
+				date: today.plus({ days: 2 }).toJSDate(),
 			});
 
 			const streaks = await getStreaksForUser(
 				user._id,
-				startOfDay(future.toJSDate()),
+				future.toJSDate(),
 				user.timezone
 			);
 			const habitStreak = streaks.find(
@@ -174,7 +173,7 @@ describe("getStreaksForUser()", () => {
 		it("should return a streak of 0 with no history", async () => {
 			const streaks = await getStreaksForUser(
 				user._id,
-				startOfDay(new Date()),
+				new Date(),
 				user.timezone
 			);
 
@@ -197,9 +196,9 @@ describe("getStreaksForUser()", () => {
 				completed: true,
 			};
 			const rows = [
-				{ ...data, date: date.toUTC().toJSDate() },
-				{ ...data, date: date.minus({ weeks: 1 }).toUTC().toJSDate() },
-				{ ...data, date: date.minus({ weeks: 2 }).toUTC().toJSDate() },
+				{ ...data, date: date.toJSDate() },
+				{ ...data, date: date.minus({ weeks: 1 }).toJSDate() },
+				{ ...data, date: date.minus({ weeks: 2 }).toJSDate() },
 			];
 			await History.insertMany(rows);
 
