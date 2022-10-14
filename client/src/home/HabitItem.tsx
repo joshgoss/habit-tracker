@@ -9,11 +9,12 @@ import HabitForm from "./HabitForm";
 
 interface Props {
 	habit: Habit;
+	habitDay: boolean;
 	history?: History;
 	streak?: number;
 }
 
-function HabitItem({ habit, history, streak }: Props) {
+function HabitItem({ habit, history, habitDay, streak }: Props) {
 	const [editing, setEditing] = useState(false);
 	const [minusing, setMinusing] = useState(false);
 	const [adding, setAdding] = useState(false);
@@ -60,7 +61,7 @@ function HabitItem({ habit, history, streak }: Props) {
 						</div>
 					)}
 
-					{amount > 0 && !completed && (
+					{habitDay && amount > 0 && !completed && (
 						<Button
 							className="h-full"
 							icon="fa-solid fa-minus"
@@ -81,7 +82,8 @@ function HabitItem({ habit, history, streak }: Props) {
 						/>
 					)}
 
-					{habit.amount - amount > 1 &&
+					{habitDay &&
+						habit.amount - amount > 1 &&
 						(!history || history.amount < habit.amount - 1) && (
 							<Button
 								className="h-full"
@@ -103,7 +105,7 @@ function HabitItem({ habit, history, streak }: Props) {
 							/>
 						)}
 
-					{habit.amount - amount === 1 && (
+					{habitDay && habit.amount - amount === 1 && (
 						<Button
 							className="h-full"
 							icon="fa-solid fa-check"
@@ -125,7 +127,7 @@ function HabitItem({ habit, history, streak }: Props) {
 						/>
 					)}
 
-					{completed && (
+					{habitDay && completed && (
 						<Button
 							className="h-full"
 							icon="fa-solid fa-undo"
