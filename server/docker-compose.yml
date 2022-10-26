@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    env_file:
+      - .env.production
+    ports: 
+      - ${MONGODB_PORT}:${MONGODB_PORT}
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+  api:
+    depends_on:
+      - mongo
+    env_file:
+      - .env.production
+    image: habit-tracker-api
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - ${NODE_PORT}:${NODE_PORT}

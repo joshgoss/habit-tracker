@@ -50,11 +50,9 @@ export const verifyGoogle = async (
 
 export const googleStrategy = new GoogleStrategy(
 	{
-		clientID: process.env.GOOGLE_CLIENT_ID,
-		clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-		callbackURL: `http://${process.env.HOST!}:${
-			process.env.PORT
-		}/auth/google/redirect`,
+		clientID: config.GOOGLE_CLIENT_ID,
+		clientSecret: config.GOOGLE_CLIENT_SECRET,
+		callbackURL: config.GOOGLE_CALLBACK,
 		passReqToCallback: true,
 		scope: "scope",
 	},
