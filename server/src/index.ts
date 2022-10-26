@@ -44,9 +44,9 @@ app.use("/history", historyRoutes);
 app.use("/timezones", timezoneRoutes);
 
 if (require.main === module) {
-	app.listen(config.PORT, () => {
+	app.listen(config.NODE_PORT, () => {
 		console.log(
-			`[server]: Server is running at https://localhost:${config.PORT}`
+			`[server]: Server is running at http://localhost:${config.NODE_PORT}`
 		);
 	});
 

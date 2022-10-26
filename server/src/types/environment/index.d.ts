@@ -9,9 +9,14 @@ declare global {
 			HOST: string;
 			JWT_EXPIRES_IN: string;
 			JWT_SECRET: string;
-			MONGODB_URI: string;
+			MONGODB_DB: string;
+			MONGODB_HOST: string;
+			MONGODB_PASSWORD: string;
+			MONGODB_PORT: string;
+			MONGODB_USER: string;
 			NODE_ENV: "development" | "production";
-			PORT: string;
+			NODE_HOST: string;
+			NODE_PORT: string;
 		}
 	}
 }
