@@ -6,11 +6,6 @@ services:
     restart: always
     env_file:
       - .env.production
-    ports: 
-      - ${MONGODB_PORT}:${MONGODB_PORT}
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
   api:
     depends_on:
       - mongo
