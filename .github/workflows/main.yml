@@ -27,4 +27,5 @@ jobs:
         port: ${{ secrets.PORT }}
         overwrite: true
         source: "./client/build/*"
+        strip_components: 2
         target: "~/apps/habit-tracker-client"
