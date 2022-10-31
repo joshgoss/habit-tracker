@@ -11,9 +11,6 @@ services:
       - mongo
     env_file:
       - .env.production
-    image: habit-tracker-api
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    image: ${DOCKER_REGISTRY}/habit-tracker-api
     ports:
       - ${NODE_PORT}:${NODE_PORT}
