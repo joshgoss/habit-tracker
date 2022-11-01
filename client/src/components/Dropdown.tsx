@@ -46,12 +46,15 @@ export function DropdownButton({ children, className }: ButtonProps) {
 }
 
 interface ItemsProps {
+	className?: string;
 	children: any;
 }
 
-export function DropdownItems({ children }: ItemsProps) {
+export function DropdownItems({ children, className }: ItemsProps) {
 	return (
-		<Menu.Items className="border absolute w-auto bg-white z-10">
+		<Menu.Items
+			className={classNames("border absolute w-auto bg-white z-10", className)}
+		>
 			{children}
 		</Menu.Items>
 	);

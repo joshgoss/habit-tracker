@@ -62,9 +62,9 @@ function HabitForm({ habit, onClose }: Props) {
 			className="bg-slate-100 p-5 border border-slate-300"
 			onSubmit={handleSubmit(onSubmit)}
 		>
-			<div className="grid grid-cols-12 gap-3">
+			<div className="grid grid-cols-1 lg:grid-cols-4 gap-3">
 				<Input
-					className="col-span-10"
+					className="lg:col-span-3"
 					label="Name"
 					name="name"
 					register={register}
@@ -72,7 +72,7 @@ function HabitForm({ habit, onClose }: Props) {
 					placeholder="My habit..."
 				/>
 
-				<div className="col-span-1">
+				<div className="lg:col-span-1">
 					<div className="flex space-x-4">
 						<IconPicker
 							required
@@ -92,7 +92,6 @@ function HabitForm({ habit, onClose }: Props) {
 					name="frequency"
 					render={({ field: { onChange, value, name } }) => (
 						<ButtonGroupInput
-							className="col-span-2"
 							name="frequency"
 							label="Frequency"
 							onChange={(values: Array<Frequency>) => {
@@ -127,7 +126,6 @@ function HabitForm({ habit, onClose }: Props) {
 						name="daysOfWeek"
 						render={({ field: { onChange, value, name } }) => (
 							<ButtonGroupInput
-								className="col-span-3"
 								name="daysOfWeek"
 								label="Days of Week"
 								multiple={frequency === Frequency.Daily}
@@ -164,7 +162,6 @@ function HabitForm({ habit, onClose }: Props) {
 				)}
 
 				<Input
-					className="col-span-4"
 					label="Amount"
 					name="amount"
 					placeholder="1"
@@ -177,7 +174,6 @@ function HabitForm({ habit, onClose }: Props) {
 					type="number"
 				/>
 			</div>
-
 			<div className="flow-root mt-5">
 				<Button
 					className="float-right"

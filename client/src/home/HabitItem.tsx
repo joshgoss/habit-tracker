@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useSetRecoilState, useRecoilState } from "recoil";
 import { Habit, History } from "../types";
 import { Button, Dropdown } from "../components";
-import { forceHistoryRefresh, historyParamsState } from "./atoms";
+import {
+	forceHistoryRefresh,
+	forceHabitsRefresh,
+	historyParamsState,
+} from "./atoms";
 import { setHistory } from "./utils";
 import api from "../utils/api";
 import HabitForm from "./HabitForm";
@@ -20,8 +24,10 @@ function HabitItem({ habit, history, habitDay, streak }: Props) {
 	const [adding, setAdding] = useState(false);
 	const [completing, setCompleting] = useState(false);
 	const [undoing, setUndoing] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 
 	const setForceHistoryRefresh = useSetRecoilState(forceHistoryRefresh);
+	const setForceHabitsRefresh = useSetRecoilState(forceHabitsRefresh);
 	const [historyParams] = useRecoilState(historyParamsState);
 
 	const historyId = history ? history._id : null;
@@ -153,7 +159,8 @@ function HabitItem({ habit, history, habitDay, streak }: Props) {
 						<Dropdown.Button className="h-full rounded-none">
 							<i className="fa fa-solid fa-cog" />
 						</Dropdown.Button>
-						<Dropdown.Items>
+
+						<Dropdown.Items className="right-0">
 							<Dropdown.Item
 								onClick={(e) => {
 									e.preventDefault();
@@ -165,7 +172,10 @@ function HabitItem({ habit, history, habitDay, streak }: Props) {
 							<Dropdown.Item
 								onClick={async (e) => {
 									e.preventDefault();
+									setForceHabitsRefresh((n) => n + 1);
+									setDeleting(true);
 									await api.destroy(`/habits/${habit._id}`);
+									setDeleting(false);
 								}}
 							>
 								Delete

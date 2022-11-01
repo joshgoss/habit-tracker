@@ -16,24 +16,6 @@ function LoginPage() {
 				>
 					Login with Google
 				</Button>
-
-				<Button
-					className="w-64 mb-4"
-					centered
-					icon=" fa-brands fa-apple fa-lg"
-					onClick={() => {}}
-				>
-					Login with Apple
-				</Button>
-
-				<Button
-					className="w-64 mb-4"
-					centered
-					icon=" fa-brands fa-github fa-lg"
-					onClick={() => {}}
-				>
-					Login with Github
-				</Button>
 			</div>
 		</>
 	);

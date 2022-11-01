@@ -17,7 +17,7 @@ const HomePage = () => {
 
 	return (
 		<Suspense fallback={<p>Loading...</p>}>
-			<div className="flow-root mb-4">
+			<div className="flow-root mb-4 px-2">
 				<Header className="inline float-left">{title}</Header>
 				<CalendarButton
 					className="float-left ml-2 text-slate-600"

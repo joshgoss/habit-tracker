@@ -10,7 +10,7 @@ function TopBar() {
 	const navigate = useNavigate();
 	const setRecoilState = useSetRecoilState(authState);
 	return (
-		<div className="flow-root py-3 mt-2 mb-3">
+		<div className="flow-root my-2 mb-5 px-2">
 			<span className="float-left font-bold leading-8 text-sky-500 text-lg">
 				Habit Tracker
 			</span>

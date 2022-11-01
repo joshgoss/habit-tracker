@@ -19,6 +19,9 @@ function HabitList() {
 
 	return (
 		<div className="mt-4 flex flex-col gap-y-3">
+			{completedHabits.length === 0 && uncompletedHabits.length === 0 && (
+				<p className="ml-4 text-gray-500">No habits added yet.</p>
+			)}
 			{uncompletedHabits.map((habit: Habit) => {
 				const habitHistory = historyData.find(
 					(h: History) => h.habitId === habit._id

@@ -25,7 +25,7 @@ const SettingsPage = () => {
 	};
 
 	return (
-		<>
+		<div className="px-2">
 			<Header>Settings</Header>
 			<form className="p-2 mt-3" onSubmit={handleSubmit(onSubmit)}>
 				<Suspense fallback={<p>loading...</p>}>
@@ -36,7 +36,7 @@ const SettingsPage = () => {
 					/>
 				</Suspense>
 
-				<div className="flow-root mt-5">
+				<div className="flow-root mt-5 gp-x-3">
 					<Button
 						className="float-right"
 						disabled={!isValid}
@@ -45,9 +45,21 @@ const SettingsPage = () => {
 					>
 						Save Settings
 					</Button>
+
+					<Button
+						className="float-right mr-3"
+						disabled={!isValid}
+						loading={isSubmitting}
+						type="button"
+						onClick={() => {
+							navigate("/");
+						}}
+					>
+						Cancel
+					</Button>
 				</div>
 			</form>
-		</>
+		</div>
 	);
 };
 
