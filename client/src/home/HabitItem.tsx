@@ -172,10 +172,12 @@ function HabitItem({ habit, history, habitDay, streak }: Props) {
 							<Dropdown.Item
 								onClick={async (e) => {
 									e.preventDefault();
-									setForceHabitsRefresh((n) => n + 1);
-									setDeleting(true);
-									await api.destroy(`/habits/${habit._id}`);
-									setDeleting(false);
+									if (!deleting) {
+										setDeleting(true);
+										await api.destroy(`/habits/${habit._id}`);
+										setForceHabitsRefresh((n) => n + 1);
+										setDeleting(false);
+									}
 								}}
 							>
 								Delete
