@@ -27,6 +27,7 @@ function HabitForm({ habit, onClose }: Props) {
 		name: "",
 		amount: 1,
 		frequency: Frequency.Daily,
+		dayOfMonth: 1,
 		daysOfWeek: [1, 2, 3, 4, 5, 6, 7],
 		color: colors[random(0, colors.length - 1)],
 		icon: icons[random(0, icons.length - 1)],
@@ -119,6 +120,21 @@ function HabitForm({ habit, onClose }: Props) {
 						</ButtonGroupInput>
 					)}
 				/>
+
+				{frequency === Frequency.Monthly && (
+					<Input
+						name="dayOfMonth"
+						label="Day of Month"
+						register={register}
+						registerOptions={{
+							required: true,
+							min: 1,
+							max: 31,
+							valueAsNumber: true,
+						}}
+						type="number"
+					/>
+				)}
 
 				{(frequency === Frequency.Daily || frequency === Frequency.Weekly) && (
 					<Controller

@@ -7,7 +7,7 @@ import {
 	forceHabitsRefresh,
 	historyParamsState,
 } from "./atoms";
-import { setHistory } from "./utils";
+import { setHistory, getStreakText } from "./utils";
 import api from "../utils/api";
 import HabitForm from "./HabitForm";
 
@@ -62,7 +62,7 @@ function HabitItem({ habit, history, habitDay, streak }: Props) {
 						<div className="w-15 h-full bg-gray-700 px-3 py-1 align-middle">
 							<i className="fa fa-fire text-2xl text-center  text-amber-400	align-middle block" />
 							<p className="text-xs text-center text-amber-400 font-bold">
-								{streak} days
+								{streak} {getStreakText(streak, habit.frequency)}
 							</p>
 						</div>
 					)}
