@@ -37,3 +37,15 @@ export const isHabitDay = (habit: Habit, date: DateTime): boolean => {
 		return false;
 	}
 };
+
+export const getStreakText = (amount: number, frequency: Frequency): string => {
+	if (frequency === Frequency.Daily) {
+		return amount > 1 ? "days" : "day";
+	} else if (frequency === Frequency.Weekly) {
+		return amount > 1 ? "weeks" : "week";
+	} else if (frequency === Frequency.Monthly) {
+		return amount > 1 ? "months" : "month";
+	} else {
+		throw new Error("Invalid frequency");
+	}
+};
