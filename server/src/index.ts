@@ -8,7 +8,7 @@ import Debug from "debug";
 import config from "./config";
 import { connectDatabase, disconnectDatabase } from "./lib/database";
 
-import { jwtStrategy, googleStrategy } from "./auth/strategies";
+import { jwtStrategy, githubStrategy, googleStrategy } from "./auth/strategies";
 import authRoutes from "./auth/routes";
 import habitsRoutes from "./habits/routes";
 import historyRoutes from "./history/routes";
@@ -24,6 +24,7 @@ serverDebug("Connected to database");
 
 serverDebug("Registering passport strategies");
 passport.use(googleStrategy);
+passport.use(githubStrategy);
 passport.use(jwtStrategy);
 
 const app: Express = express();

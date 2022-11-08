@@ -7,6 +7,9 @@ declare global {
 			GOOGLE_CALLBACK: string;
 			GOOGLE_CLIENT_ID: string;
 			GOOGLE_CLIENT_SECRET: string;
+			GITHUB_CALLBACK: string;
+			GITHUB_CLIENT_ID: string;
+			GITHUB_CLIENT_SECRET: string;
 			HOST: string;
 			JWT_EXPIRES_IN: string;
 			JWT_SECRET: string;

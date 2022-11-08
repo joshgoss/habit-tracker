@@ -57,6 +57,9 @@ router.put(
 	}
 );
 
+/********************
+ * Google Auth
+ ********************/
 const googleDebug = Debug("auth:google");
 router.get(
 	"/google",
@@ -89,6 +92,49 @@ router.get(
 		googleDebug(`Redirecting to:  ${config.AUTH_SUCCESS_REDIRECT}`);
 		const expiresAt = Date.now() + config.JWT_EXPIRES_IN * 1000;
 		googleDebug("Expires at is: ", expiresAt);
+
+		res.redirect(
+			302,
+			`${config.AUTH_SUCCESS_REDIRECT}?accessToken=${accessToken}&expiresAt=${expiresAt}`
+		);
+	}
+);
+
+/********************
+ * Github Auth
+ ********************/
+const githubDebug = Debug("auth:github");
+router.get(
+	"/github",
+	passport.authenticate("github", {
+		scope: ["profile"],
+		session: false,
+	})
+);
+router.get(
+	"/github/redirect",
+	passport.authenticate("github", {
+		session: false,
+		failureRedirect: "/",
+	}),
+	(req, res) => {
+		githubDebug("Request user is: ", req.user);
+		githubDebug("Github callback called");
+		if (!req.user) {
+			return res.status(401).json({ code: 401, error: "Not authorized" });
+		}
+		githubDebug("Generating accessToken...");
+		const accessToken = generateAccessToken(
+			{
+				sub: req.user._id,
+				provider: req.user.provider,
+			},
+			config.JWT_EXPIRES_IN
+		);
+		githubDebug(`accessToken is: ${accessToken}`);
+		githubDebug(`Redirecting to:  ${config.AUTH_SUCCESS_REDIRECT}`);
+		const expiresAt = Date.now() + config.JWT_EXPIRES_IN * 1000;
+		githubDebug("Expires at is: ", expiresAt);
 
 		res.redirect(
 			302,
