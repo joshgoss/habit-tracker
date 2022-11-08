@@ -16,6 +16,17 @@ function LoginPage() {
 				>
 					Login with Google
 				</Button>
+
+				<Button
+					className="w-64 mb-4"
+					centered
+					icon="fa-brands fa-github"
+					onClick={() => {
+						window.location.href = `${process.env.REACT_APP_API_URL}/auth/github`;
+					}}
+				>
+					Login with Github
+				</Button>
 			</div>
 		</>
 	);

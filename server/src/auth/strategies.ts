@@ -10,17 +10,17 @@ import { User } from "../users/models";
  * Google Strategy
  *****************************/
 import {
-	Profile,
+	Profile as GoogleProfile,
 	Strategy as GoogleStrategy,
 	VerifyCallback,
 } from "passport-google-oauth20";
 
-const googleDebug = Debug("strategy:google");
+const googleDebug = Debug("auth:google");
 export const verifyGoogle = async (
 	req: Request,
 	accessToken: string,
 	refreshToken: string,
-	profile: Profile,
+	profile: GoogleProfile,
 	done: VerifyCallback
 ) => {
 	googleDebug("Verifying google authentication");
@@ -75,3 +75,52 @@ export const verifyJwt = async (payload: JwtPayload, done: Function) => {
 };
 
 export const jwtStrategy = new JwtStrategy(jwtOptions, verifyJwt);
+
+/*******************************
+ * Github Strategy
+ *******************************/
+import {
+	Strategy as GitHubStrategy,
+	Profile as GithubProfile,
+} from "passport-github2";
+const githubDebug = Debug("auth:github");
+export const verifyGithub = async (
+	accessToken: string,
+	refreshToken: string,
+	profile: GithubProfile,
+	done: VerifyCallback
+) => {
+	githubDebug("Verifying github authentication");
+	githubDebug("accessToken: ", accessToken);
+	githubDebug("refreshToken: ", refreshToken);
+	githubDebug("Profile: ", profile);
+	let user = await User.findOne({
+		provider: AuthProvider.Github,
+		providerUserId: profile.id,
+	});
+
+	if (!user) {
+		const names = profile.displayName.split(" ");
+		githubDebug("No user found. Creating new user...");
+		user = await User.create({
+			firstName: names[0],
+			lastName: names.length > 1 ? names[1] : "",
+			provider: AuthProvider.Github,
+			providerUserId: profile.id,
+		});
+		githubDebug("New user created");
+	} else {
+		githubDebug("Existing user found");
+	}
+
+	return done(null, user);
+};
+
+export const githubStrategy = new GitHubStrategy(
+	{
+		clientID: config.GITHUB_CLIENT_ID,
+		clientSecret: config.GITHUB_CLIENT_SECRET,
+		callbackURL: config.GITHUB_CALLBACK,
+	},
+	verifyGithub
+);
